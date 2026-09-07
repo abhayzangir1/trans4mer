@@ -79,13 +79,7 @@ export default function TeamSidebar() {
     if (!activeProjectId) return;
     const isRunningInTauri = typeof window !== 'undefined' && ((window as any).__TAURI_INTERNALS__ !== undefined);
     if (!isRunningInTauri) {
-      setTeamMembers([
-        { id: 'agent-boss', name: 'Boss Agent', role: 'Chief AI Swarm Orchestrator', definition_id: 'orchestrator', status: 'Running' },
-        { id: 'agent-rust-systems', name: 'Rust Systems Engineer', role: 'Tokio Concurrency & IPC', definition_id: 'rust_engineer', status: 'Working' },
-        { id: 'agent-security', name: 'Security & Policy Auditor', role: 'Zero-Trust Policy Gate', definition_id: 'security_auditor', status: 'Idle' },
-        { id: 'agent-memory', name: 'Memory Specialist', role: '4-Tier Cognitive RAG', definition_id: 'memory_specialist', status: 'Idle' },
-        { id: 'agent-cdp', name: 'CDP Browser Navigator', role: 'Headless DOM & Live Mirror', definition_id: 'browser_navigator', status: 'Idle' },
-      ]);
+      setTeamMembers([]);
       return;
     }
     invoke<any[]>('list_agents', { projectId: activeProjectId })

@@ -38,17 +38,8 @@ export default function XTermWrapper() {
 
     const isRunningInTauri = typeof window !== 'undefined' && ((window as any).__TAURI_INTERNALS__ !== undefined);
     if (!isRunningInTauri) {
-      term.writeln('\x1b[36mTrans4mers Sovereign PTY [v0.1.0-local]\x1b[0m');
-      term.writeln('\x1b[90mSubstrate: Tokio Semaphore | Storage: SQLite (Encrypted) | LLM: Ollama (32B)\x1b[0m');
-      term.writeln('');
-      term.writeln('\x1b[32mtrans4mers-agent@workstation\x1b[0m:\x1b[34m~/workspace\x1b[0m$ cargo test --workspace --quiet');
-      term.writeln('running 38 tests');
-      term.writeln('test domain::capability::tests::verify_policy_lattice ... \x1b[32mok\x1b[0m');
-      term.writeln('test engine::scheduler::tests::verify_tokio_semaphore_cap ... \x1b[32mok\x1b[0m');
-      term.writeln('test storage::memory::tests::verify_rrf_scoring ... \x1b[32mok\x1b[0m');
-      term.writeln('test result: \x1b[32mok\x1b[0m. 38 passed; 0 failed; 0 ignored');
-      term.writeln('');
-      term.write('\x1b[32mtrans4mers-agent@workstation\x1b[0m:\x1b[34m~/workspace\x1b[0m$ ');
+      term.writeln('\x1b[33m[Trans4mers Terminal Substrate]\x1b[0m');
+      term.writeln('\x1b[90mNative PTY requires the desktop shell. Launch via .\\run-app.bat or cargo tauri dev.\x1b[0m');
       return;
     }
 

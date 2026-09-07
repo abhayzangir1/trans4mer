@@ -63,52 +63,7 @@ export function useAgents(projectId: string | null) {
       try {
         const isRunningInTauri = typeof window !== 'undefined' && ((window as any).__TAURI_INTERNALS__ !== undefined);
         if (!isRunningInTauri) {
-          setAgents([
-            {
-              id: 'agent-boss',
-              projectId: projectId,
-              status: 'Running',
-              definitionId: 'orchestrator',
-              name: 'Boss Agent',
-              role: 'Chief AI Swarm Orchestrator',
-            },
-            {
-              id: 'agent-rust-systems',
-              projectId: projectId,
-              status: 'Working',
-              definitionId: 'rust_engineer',
-              name: 'Rust Systems Engineer',
-              role: 'Tokio Concurrency & IPC Bridges',
-              parentId: 'agent-boss',
-            },
-            {
-              id: 'agent-security',
-              projectId: projectId,
-              status: 'Idle',
-              definitionId: 'security_auditor',
-              name: 'Security & Policy Auditor',
-              role: 'Zero-Trust LCS Diff Reviewer',
-              parentId: 'agent-boss',
-            },
-            {
-              id: 'agent-memory',
-              projectId: projectId,
-              status: 'Idle',
-              definitionId: 'memory_specialist',
-              name: 'Cognitive Memory Specialist',
-              role: '4-Tier RAG (LanceDB + FTS5 RRF)',
-              parentId: 'agent-boss',
-            },
-            {
-              id: 'agent-cdp',
-              projectId: projectId,
-              status: 'Idle',
-              definitionId: 'browser_navigator',
-              name: 'CDP Browser Navigator',
-              role: 'Headless DOM & Live Mirror',
-              parentId: 'agent-boss',
-            }
-          ]);
+          setAgents([]);
           return;
         }
         const initial = await invoke<any[]>('list_agents', { projectId });

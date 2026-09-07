@@ -361,7 +361,7 @@ export default function LiveMirrorPane() {
                     onClick={() => handleNavigate('https://docs.rs')}
                     className="mt-4 px-3 py-1.5 rounded bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-xs transition-colors"
                   >
-                    Load Demo Page (docs.rs)
+                    Navigate to docs.rs
                   </button>
                 </div>
               )}

@@ -45,22 +45,9 @@ function App() {
 
   useEffect(() => {
     if (!isRunningInTauri) {
-      setDbStatus('Connected (SQLite)');
-      setOllamaStatus('Online (qwen2.5-coder:32b)');
+      setDbStatus('Desktop Shell Required');
+      setOllamaStatus('Unavailable in Web Browser');
       setIsSetupComplete(true);
-      if (projects.length === 0) {
-        useProjectStore.setState({
-          projects: [
-            {
-              id: 'proj-trans4mers-local',
-              name: 'Trans4mers Sovereign OS',
-              workspace_path: 'D:\\Devpost Hackathons\\all things agentic hackathon\\trans4mers-local',
-              created_at: new Date().toISOString(),
-            }
-          ],
-          activeProjectId: 'proj-trans4mers-local',
-        });
-      }
       return;
     }
     const checkConfigurationAndStatus = async () => {

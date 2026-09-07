@@ -42,33 +42,7 @@ export const useConversationStore = create<ConversationState>((set, get) => ({
     try {
       const isRunningInTauri = typeof window !== 'undefined' && ((window as any).__TAURI_INTERNALS__ !== undefined);
       if (!isRunningInTauri) {
-        const previewConvs: Conversation[] = [
-          {
-            id: 'conv-general',
-            project_id: projectId,
-            title: 'general',
-            status: 'Active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'conv-swarm-ops',
-            project_id: projectId,
-            title: 'swarm-coordination',
-            status: 'Active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
-          {
-            id: 'conv-security',
-            project_id: projectId,
-            title: 'security-audit',
-            status: 'Active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }
-        ];
-        set({ conversations: previewConvs, activeConversationId: 'conv-general', activeDmAgent: null });
+        set({ conversations: [], activeConversationId: null, activeDmAgent: null });
         return;
       }
       const convs = await invoke<Conversation[]>('list_conversations', { projectId });

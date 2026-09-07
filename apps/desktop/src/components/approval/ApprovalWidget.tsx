@@ -73,10 +73,7 @@ export default function ApprovalWidget() {
   useEffect(() => {
     const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
     if (!isRunningInTauri) {
-      setAgentNameMap({
-        'agent-sec': 'Security & Policy Auditor',
-        'agent-boss': 'Boss Agent',
-      });
+      setAgentNameMap({});
       return;
     }
 
@@ -99,18 +96,7 @@ export default function ApprovalWidget() {
   const fetchApprovals = async () => {
     const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
     if (!isRunningInTauri) {
-      setPendingApprovals([
-        {
-          id: 'appr-sec-001',
-          agent: 'agent-sec',
-          action: 'filesystem.write',
-          target: 'core/trans4mers-engine/src/scheduler.rs',
-          rawArgs: {
-            path: 'core/trans4mers-engine/src/scheduler.rs',
-            content: '+ pub age_bonus_weight: f64,\n+ Self { age_bonus_weight: 1.25 }'
-          }
-        }
-      ]);
+      setPendingApprovals([]);
       return;
     }
 
@@ -180,35 +166,6 @@ export default function ApprovalWidget() {
   const inspectDiff = async (approvalId: string) => {
     const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
     if (!isRunningInTauri) {
-      setActiveDiff({
-        id: 'diff-001',
-        project_id: activeProjectId || 'proj-trans4mers-local',
-        approval_id: approvalId,
-        capability: 'filesystem.write',
-        risk_level: 'High',
-        kind: { type: 'FileSystemWrite', details: { path: 'core/trans4mers-engine/src/scheduler.rs' } },
-        diff_payload: '@@ -12,4 +12,6 @@\n pub struct ConcurrencyScheduler {\n     pub node_semaphore: Arc<Semaphore>,\n+    pub project_cap: u32,\n+    pub age_bonus_weight: f64,\n',
-        hunks: [
-          {
-            id: 'hunk-01',
-            header: '@@ -12,4 +12,6 @@ pub struct ConcurrencyScheduler',
-            old_start: 12,
-            old_lines: 4,
-            new_start: 12,
-            new_lines: 6,
-            lines: [
-              ' pub struct ConcurrencyScheduler {',
-              '     pub node_semaphore: Arc<Semaphore>,',
-              '+    pub project_cap: u32,',
-              '+    pub age_bonus_weight: f64,',
-              ' }'
-            ],
-            approved: true,
-          }
-        ],
-        decision: 'Pending',
-        created_at: new Date().toISOString(),
-      });
       return;
     }
 

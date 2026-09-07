@@ -48,78 +48,9 @@ export default function FleetDashboard() {
   const refreshFleet = async () => {
     const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
     if (!isRunningInTauri) {
-      setSubstrateStatus({
-        database_status: 'Connected',
-        ollama_status: 'Online',
-        active_tasks: 2,
-        completed_tasks: 14,
-        memory_entries_count: 184,
-        vector_store_type: 'LanceDB + SQLite FTS5 RRF',
-      });
-      setAgents([
-        {
-          id: 'agent-boss',
-          projectId: activeProjectId || 'proj-trans4mers-local',
-          name: 'Boss Agent',
-          role: 'Chief AI Swarm Orchestrator',
-          definitionId: 'boss_orchestrator',
-          status: 'Running',
-          model: 'qwen2.5-coder:32b',
-          capabilities: ['orchestration', 'task_delegation', 'context_compaction'],
-          currentStep: 4,
-          maxSteps: 25,
-          executionId: 'exec-boss-001',
-        },
-        {
-          id: 'agent-rust',
-          projectId: activeProjectId || 'proj-trans4mers-local',
-          name: 'Rust Systems Engineer',
-          role: 'Tokio Concurrency & IPC Bridges',
-          definitionId: 'rust_systems_engineer',
-          status: 'Running',
-          model: 'qwen2.5-coder:32b',
-          capabilities: ['pty_terminal', 'git_worktree', 'fs_read_write'],
-          currentStep: 3,
-          maxSteps: 25,
-          executionId: 'exec-rust-002',
-        },
-        {
-          id: 'agent-sec',
-          projectId: activeProjectId || 'proj-trans4mers-local',
-          name: 'Security & Policy Auditor',
-          role: 'Zero-Trust LCS Diff Reviewer',
-          definitionId: 'security_auditor',
-          status: 'Idle',
-          model: 'deepseek-r1:14b',
-          capabilities: ['policy_evaluation', 'diff_review', 'sha256_verification'],
-          currentStep: 0,
-          maxSteps: 25,
-        },
-        {
-          id: 'agent-mem',
-          projectId: activeProjectId || 'proj-trans4mers-local',
-          name: 'Cognitive Memory Specialist',
-          role: '4-Tier RAG (LanceDB + FTS5 RRF)',
-          definitionId: 'memory_specialist',
-          status: 'Idle',
-          model: 'nomic-embed-text',
-          capabilities: ['hybrid_rrf_retrieval', 'fts5_bm25', 'nightly_dreaming'],
-          currentStep: 0,
-          maxSteps: 25,
-        },
-        {
-          id: 'agent-cdp',
-          projectId: activeProjectId || 'proj-trans4mers-local',
-          name: 'CDP Browser Navigator',
-          role: 'Headless DOM & Live Mirror',
-          definitionId: 'cdp_browser',
-          status: 'Idle',
-          model: 'qwen2.5-coder:32b',
-          capabilities: ['cdp_session', 'dom_snapshot', 'auth_injection'],
-          currentStep: 0,
-          maxSteps: 25,
-        },
-      ]);
+      setSubstrateStatus(null);
+      setAgents([]);
+      setLoading(false);
       return;
     }
 

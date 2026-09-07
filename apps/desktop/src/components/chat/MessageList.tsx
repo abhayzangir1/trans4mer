@@ -158,40 +158,7 @@ export default function MessageList() {
       try {
         const isRunningInTauri = typeof window !== 'undefined' && ((window as any).__TAURI_INTERNALS__ !== undefined);
         if (!isRunningInTauri) {
-          setMessages([
-            {
-              id: 'msg-1',
-              role: 'user',
-              senderName: 'Abhay Zangir',
-              senderRole: 'Human Operator',
-              text: 'Assemble our core engineering swarm. Audit the Tokio semaphore concurrency scheduler and verify LanceDB hybrid vector retrieval.',
-              timestamp: '10:42 AM',
-            },
-            {
-              id: 'msg-2',
-              role: 'agent',
-              senderName: 'Boss Agent',
-              senderRole: 'Chief AI Swarm Orchestrator',
-              text: 'Decomposing objective into milestone sub-tasks: (1) Delegating scheduler audit to Rust Systems Engineer; (2) Delegating vector verification to Memory Specialist. Requesting Tokio permits...',
-              timestamp: '10:42 AM',
-            },
-            {
-              id: 'msg-3',
-              role: 'agent',
-              senderName: 'Rust Systems Engineer',
-              senderRole: 'Tokio Concurrency & IPC Bridges',
-              text: 'Permit acquired. Inspected `core/trans4mers-engine/src/scheduler.rs`: Project cap enforced at 4 concurrent tasks, node global concurrency semaphore capped at 8. Starvation-resistant age bonus active.',
-              timestamp: '10:43 AM',
-            },
-            {
-              id: 'msg-4',
-              role: 'agent',
-              senderName: 'Cognitive Memory Specialist',
-              senderRole: '4-Tier RAG (LanceDB + FTS5 RRF)',
-              text: 'Reciprocal Rank Fusion query completed across LanceDB 384-dim vector embeddings and SQLite FTS5 lexical index. 18 chunk records ranked with score cut-off 0.82. Memory pyramid stable.',
-              timestamp: '10:43 AM',
-            }
-          ]);
+          setMessages([]);
           return;
         }
         // 1. Fetch genuine persisted message history from SQLite
