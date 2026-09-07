@@ -307,40 +307,39 @@ impl LlmProvider for OllamaProvider {
                                 if let Ok(json_val) =
                                     serde_json::from_str::<serde_json::Value>(&line_str)
                                 {
-                                    if let Some(tool_calls) = json_val
+                                    if let Some(tc) = json_val
                                         .get("message")
                                         .and_then(|m| m.get("tool_calls"))
                                         .and_then(|tc| tc.as_array())
                                         .filter(|a| !a.is_empty())
+                                        .and_then(|tool_calls| tool_calls.first())
                                     {
-                                        if let Some(tc) = tool_calls.first() {
-                                            let id = tc.get("id").and_then(|v| v.as_str()).map(String::from);
-                                            let name = tc
-                                                .get("function")
-                                                .and_then(|f| f.get("name"))
-                                                .and_then(|v| v.as_str())
-                                                .map(String::from);
-                                            let args = tc
-                                                .get("function")
-                                                .and_then(|f| f.get("arguments"))
-                                                .map(|v| {
-                                                    if let Some(s) = v.as_str() {
-                                                        s.to_string()
-                                                    } else {
-                                                        v.to_string()
-                                                    }
-                                                })
-                                                .unwrap_or_default();
-                                            return Some((
-                                                Ok(LlmStreamChunk::ToolCallDelta {
-                                                    index: 0,
-                                                    id,
-                                                    name,
-                                                    arguments_delta: args,
-                                                }),
-                                                (bs, Vec::new(), true),
-                                            ));
-                                        }
+                                        let id = tc.get("id").and_then(|v| v.as_str()).map(String::from);
+                                        let name = tc
+                                            .get("function")
+                                            .and_then(|f| f.get("name"))
+                                            .and_then(|v| v.as_str())
+                                            .map(String::from);
+                                        let args = tc
+                                            .get("function")
+                                            .and_then(|f| f.get("arguments"))
+                                            .map(|v| {
+                                                if let Some(s) = v.as_str() {
+                                                    s.to_string()
+                                                } else {
+                                                    v.to_string()
+                                                }
+                                            })
+                                            .unwrap_or_default();
+                                        return Some((
+                                            Ok(LlmStreamChunk::ToolCallDelta {
+                                                index: 0,
+                                                id,
+                                                name,
+                                                arguments_delta: args,
+                                            }),
+                                            (bs, Vec::new(), true),
+                                        ));
                                     }
 
                                     let content_delta = json_val
