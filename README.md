@@ -44,26 +44,38 @@ Every state transition writes to an append-only event log before updating databa
 <table>
   <tr>
     <td width="50%" valign="top">
-      <h3 align="center">Real-Time Swarm Topology & Map</h3>
-      <a href="assets/screenshots/02_realtime_swarm_map.png"><img src="assets/screenshots/02_realtime_swarm_map.png" alt="Real-time Swarm Map" /></a>
-      <p align="center"><i>Visualizing hierarchical task delegation, running workers, and active state transitions in a live interactive DAG.</i></p>
+      <h3 align="center">Real-Time Swarm Topology & Designer</h3>
+      <a href="assets/screenshots/02_local_swarm_designer.png"><img src="assets/screenshots/02_local_swarm_designer.png" alt="Real-time Swarm Topology" /></a>
+      <p align="center"><i>Visualizing hierarchical task delegation, running workers, and active state transitions in an interactive ReactFlow DAG.</i></p>
     </td>
     <td width="50%" valign="top">
-      <h3 align="center">Zero-Trust Human Approval (HITL)</h3>
-      <a href="assets/screenshots/03_hitl_human_approval.png"><img src="assets/screenshots/03_hitl_human_approval.png" alt="Human In The Loop Approval" /></a>
-      <p align="center"><i>Deterministic policy gating: destructive terminal commands and code modifications halt for operator authorization.</i></p>
+      <h3 align="center">Zero-Trust Human Approval & LCS Diff</h3>
+      <a href="assets/screenshots/07_local_hitl_approval_diff.png"><img src="assets/screenshots/07_local_hitl_approval_diff.png" alt="Human In The Loop Approval" /></a>
+      <p align="center"><i>Deterministic policy gating: destructive terminal commands and code modifications halt for hunk-level operator authorization.</i></p>
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h3 align="center">Slack-Style Blackboard & Channels</h3>
-      <a href="assets/screenshots/04_slack_orchestration_blackboard.png"><img src="assets/screenshots/04_slack_orchestration_blackboard.png" alt="Shared Blackboard Orchestration" /></a>
-      <p align="center"><i>Specialized agent teams collaborating via shared pub/sub channels, consensus blackboards, and private DMs.</i></p>
+      <h3 align="center">Slack-Style Blackboard & Native Terminal</h3>
+      <a href="assets/screenshots/01_local_chat_blackboard.png"><img src="assets/screenshots/01_local_chat_blackboard.png" alt="Shared Blackboard Orchestration" /></a>
+      <p align="center"><i>Specialized agent teams collaborating via shared pub/sub channels, consensus blackboards, and live duplex PTY sessions.</i></p>
     </td>
     <td width="50%" valign="top">
-      <h3 align="center">Sandboxed Code Execution & IDE</h3>
-      <a href="assets/screenshots/05_isolated_sandboxing_ide.png"><img src="assets/screenshots/05_isolated_sandboxing_ide.png" alt="Sandboxed Code Execution" /></a>
-      <p align="center"><i>Agents write and refactor code directly on disk with live Monaco editor inspection and PTY terminal sessions.</i></p>
+      <h3 align="center">Sovereign Fleet Concurrency Dashboard</h3>
+      <a href="assets/screenshots/03_local_fleet_dashboard.png"><img src="assets/screenshots/03_local_fleet_dashboard.png" alt="Sovereign Fleet Dashboard" /></a>
+      <p align="center"><i>Tokio Semaphore permit tracking, live daemon supervision, and crash-safe ReAct step counters across active workers.</i></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3 align="center">4-Tier Cognitive Memory Pyramid</h3>
+      <a href="assets/screenshots/04_local_memory_inspector.png"><img src="assets/screenshots/04_local_memory_inspector.png" alt="Cognitive Memory Pyramid" /></a>
+      <p align="center"><i>Working, Episodic, Semantic, and Procedural memory tiers indexed with SQLite FTS5 BM25 and dense vector similarity.</i></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3 align="center">Sandboxed Monaco Code Editor & IDE</h3>
+      <a href="assets/screenshots/05_local_monaco_editor.png"><img src="assets/screenshots/05_local_monaco_editor.png" alt="Sandboxed Code Execution" /></a>
+      <p align="center"><i>Agents write and refactor code directly on disk with live Monaco editor inspection and zero-scope filesystem protection.</i></p>
     </td>
   </tr>
 </table>

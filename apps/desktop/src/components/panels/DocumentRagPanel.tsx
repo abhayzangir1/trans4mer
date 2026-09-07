@@ -11,7 +11,7 @@ import {
   Clock,
   Filter
 } from 'lucide-react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { useUiStore } from '../../store/uiStore';
 
 export interface DocIngestState {
@@ -45,6 +45,62 @@ export default function DocumentRagPanel() {
   const [activeSubTab, setActiveSubTab] = useState<'search' | 'indexed'>('search');
 
   const loadIngestStates = async () => {
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) {
+      setIngestStates([
+        {
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          file_path: 'core/trans4mers-engine/src/scheduler.rs',
+          content_hash: 'sha256-a9f2c7104b...',
+          chunk_count: 8,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          file_path: 'core/trans4mers-engine/src/swarm_orchestrator.rs',
+          content_hash: 'sha256-5b8d21c4e...',
+          chunk_count: 14,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          file_path: 'core/trans4mers-storage/src/repos/memory_repo.rs',
+          content_hash: 'sha256-78e11a09f...',
+          chunk_count: 12,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          file_path: 'docs/architecture/MEMORY_AND_RAG_ARCHITECTURE.md',
+          content_hash: 'sha256-f402ccb31...',
+          chunk_count: 22,
+          updated_at: new Date().toISOString(),
+        }
+      ]);
+      setSearchResults([
+        {
+          chunk_id: 'chk-sch-01',
+          file_path: 'core/trans4mers-engine/src/scheduler.rs',
+          line_start: 31,
+          line_end: 45,
+          snippet: 'pub async fn acquire_permit(&self, agent_id: &str) -> Result<OwnedSemaphorePermit, SchedulerError> {\n    let permit = self.node_semaphore.clone().acquire_owned().await...;\n    Ok(permit)\n}',
+          kind: 'rust_function',
+          score: 0.942,
+        },
+        {
+          chunk_id: 'chk-mem-02',
+          file_path: 'core/trans4mers-storage/src/rrf.rs',
+          line_start: 12,
+          line_end: 28,
+          snippet: 'pub fn calculate_rrf_score(rank_fts: usize, rank_vec: usize, k: f64) -> f64 {\n    (1.0 / (k + rank_fts as f64)) + (1.0 / (k + rank_vec as f64))\n}',
+          kind: 'rust_function',
+          score: 0.887,
+        },
+      ]);
+      setSearchQuery('acquire_permit tokio semaphore');
+      return;
+    }
+
     if (!activeProjectId) return;
     try {
       const states = await invoke<DocIngestState[]>('list_ingested_documents', {

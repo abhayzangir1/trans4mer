@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { useProjectStore } from '../../store/projectStore';
 import { useUiStore } from '../../store/uiStore';
 
@@ -9,7 +9,7 @@ interface Props {
 }
 
 function detectLanguage(filePath?: string | null): string {
-  if (!filePath) return 'plaintext';
+  if (!filePath) return 'rust';
   const ext = filePath.split('.').pop()?.toLowerCase() || '';
   switch (ext) {
     case 'rs':
@@ -66,6 +66,54 @@ export default function CodeEditor({ filePath }: Props) {
 
   // Fetch physical file content when path changes
   useEffect(() => {
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) {
+      const demoCode = `//! Multi-Agent Swarm Concurrency Scheduler & Semaphore Arbiter
+//! Enforces starvation-resistant age bonus and node-level concurrency limits.
+
+use std::sync::Arc;
+use tokio::sync::{Semaphore, OwnedSemaphorePermit};
+use crate::domain::capability::Capability;
+use crate::domain::errors::SchedulerError;
+
+pub struct ConcurrencyScheduler {
+    /// Global node-level concurrency semaphore (default 8 permits)
+    pub node_semaphore: Arc<Semaphore>,
+    /// Per-project maximum concurrent agent limit (default 4 permits)
+    pub project_cap: u32,
+    /// Starvation-resistant queue priority weight
+    pub age_bonus_weight: f64,
+}
+
+impl ConcurrencyScheduler {
+    pub fn new(max_concurrent_agents: usize, project_cap: u32) -> Self {
+        Self {
+            node_semaphore: Arc::new(Semaphore::new(max_concurrent_agents)),
+            project_cap,
+            age_bonus_weight: 1.25,
+        }
+    }
+
+    /// Acquire an execution permit for an autonomous agent daemon
+    pub async fn acquire_permit(&self, agent_id: &str) -> Result<OwnedSemaphorePermit, SchedulerError> {
+        tracing::info!(agent_id = %agent_id, "Requesting execution permit from Tokio semaphore pool");
+        
+        let permit = self.node_semaphore
+            .clone()
+            .acquire_owned()
+            .await
+            .map_err(|_| SchedulerError::SemaphoreClosed)?;
+
+        tracing::info!(agent_id = %agent_id, "Permit successfully acquired. Dispatching ReAct step loop");
+        Ok(permit)
+    }
+}
+`;
+      setContent(demoCode);
+      setOriginalContent(demoCode);
+      return;
+    }
+
     if (!filePath || !activeProjectId) {
       setContent('// Select a file to view its contents...');
       setOriginalContent('');
@@ -82,7 +130,7 @@ export default function CodeEditor({ filePath }: Props) {
       })
       .catch((err) => {
         if (isMounted) {
-          setContent(`// Error reading file: ${err}`);
+          setContent("// Error reading file: " + err);
           setOriginalContent('');
         }
       });

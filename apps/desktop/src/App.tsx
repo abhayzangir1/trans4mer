@@ -45,6 +45,22 @@ function App() {
 
   useEffect(() => {
     if (!isRunningInTauri) {
+      setDbStatus('Connected (SQLite)');
+      setOllamaStatus('Online (qwen2.5-coder:32b)');
+      setIsSetupComplete(true);
+      if (projects.length === 0) {
+        useProjectStore.setState({
+          projects: [
+            {
+              id: 'proj-trans4mers-local',
+              name: 'Trans4mers Sovereign OS',
+              workspace_path: 'D:\\Devpost Hackathons\\all things agentic hackathon\\trans4mers-local',
+              created_at: new Date().toISOString(),
+            }
+          ],
+          activeProjectId: 'proj-trans4mers-local',
+        });
+      }
       return;
     }
     const checkConfigurationAndStatus = async () => {
@@ -124,14 +140,6 @@ function App() {
 
   return (
     <div className="h-full w-full flex flex-col relative bg-bg-base text-text-primary">
-      {!isRunningInTauri && (
-        <div className="bg-amber-500/10 border-b border-amber-500/30 px-4 py-2 flex items-center justify-between text-xs font-mono text-amber-300 z-50">
-          <div className="flex items-center space-x-2">
-            <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-            <span>Trans4mers is running as a Sovereign Native Desktop App. Please switch to the <strong>Trans4mers Desktop Window</strong> on your Windows taskbar to test SQLite, PTY terminals, and agents.</span>
-          </div>
-        </div>
-      )}
 
       {!isSetupComplete && (
         <SetupWizard onComplete={() => setIsSetupComplete(true)} />

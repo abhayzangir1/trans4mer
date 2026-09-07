@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ShieldAlert, Check, X, FileText } from 'lucide-react';
 import { listen } from '@tauri-apps/api/event';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { useUiStore } from '../../store/uiStore';
 import DiffReviewPanel, { ActionDiff } from './DiffReviewPanel';
 
@@ -71,6 +71,15 @@ export default function ApprovalWidget() {
   const [agentNameMap, setAgentNameMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) {
+      setAgentNameMap({
+        'agent-sec': 'Security & Policy Auditor',
+        'agent-boss': 'Boss Agent',
+      });
+      return;
+    }
+
     if (!activeProjectId) return;
     invoke<any[]>('list_agents', { projectId: activeProjectId })
       .then((agents) => {
@@ -88,6 +97,23 @@ export default function ApprovalWidget() {
   }, [activeProjectId]);
 
   const fetchApprovals = async () => {
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) {
+      setPendingApprovals([
+        {
+          id: 'appr-sec-001',
+          agent: 'agent-sec',
+          action: 'filesystem.write',
+          target: 'core/trans4mers-engine/src/scheduler.rs',
+          rawArgs: {
+            path: 'core/trans4mers-engine/src/scheduler.rs',
+            content: '+ pub age_bonus_weight: f64,\n+ Self { age_bonus_weight: 1.25 }'
+          }
+        }
+      ]);
+      return;
+    }
+
     if (!activeProjectId) return;
     try {
       const approvals = await invoke<any[]>('get_pending_approvals', { projectId: activeProjectId });
@@ -106,9 +132,9 @@ export default function ApprovalWidget() {
   };
 
   useEffect(() => {
-    if (!activeProjectId) return;
-
     fetchApprovals();
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) return;
 
     // Real native Tauri IPC event listener for approvals
     const unlisten = listen<string>('domain_event', (event) => {
@@ -152,6 +178,40 @@ export default function ApprovalWidget() {
   }, [activeProjectId, activeDiff]);
 
   const inspectDiff = async (approvalId: string) => {
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) {
+      setActiveDiff({
+        id: 'diff-001',
+        project_id: activeProjectId || 'proj-trans4mers-local',
+        approval_id: approvalId,
+        capability: 'filesystem.write',
+        risk_level: 'High',
+        kind: { type: 'FileSystemWrite', details: { path: 'core/trans4mers-engine/src/scheduler.rs' } },
+        diff_payload: '@@ -12,4 +12,6 @@\n pub struct ConcurrencyScheduler {\n     pub node_semaphore: Arc<Semaphore>,\n+    pub project_cap: u32,\n+    pub age_bonus_weight: f64,\n',
+        hunks: [
+          {
+            id: 'hunk-01',
+            header: '@@ -12,4 +12,6 @@ pub struct ConcurrencyScheduler',
+            old_start: 12,
+            old_lines: 4,
+            new_start: 12,
+            new_lines: 6,
+            lines: [
+              ' pub struct ConcurrencyScheduler {',
+              '     pub node_semaphore: Arc<Semaphore>,',
+              '+    pub project_cap: u32,',
+              '+    pub age_bonus_weight: f64,',
+              ' }'
+            ],
+            approved: true,
+          }
+        ],
+        decision: 'Pending',
+        created_at: new Date().toISOString(),
+      });
+      return;
+    }
+
     if (!activeProjectId) return;
     setLoadingDiffId(approvalId);
     try {

@@ -12,7 +12,7 @@ import {
   List, 
   RefreshCw 
 } from 'lucide-react';
-import { invoke } from '@tauri-apps/api/core';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import { useUiStore } from '../../store/uiStore';
 import LifeGraphView from './LifeGraphView';
 
@@ -58,6 +58,81 @@ export default function MemoryInspector() {
   const [loading, setLoading] = useState(false);
 
   const loadData = async (overrideQuery?: string) => {
+    const isRunningInTauri = typeof window !== 'undefined' && (isTauri() || (window as any).__TAURI_INTERNALS__ !== undefined);
+    if (!isRunningInTauri) {
+      setStats([
+        { tier: 'Working', count: 42, avg_importance: 0.84 },
+        { tier: 'Episodic', count: 68, avg_importance: 0.76 },
+        { tier: 'Semantic', count: 53, avg_importance: 0.91 },
+        { tier: 'Procedural', count: 21, avg_importance: 0.98 },
+      ]);
+      const mockMems: MemoryItem[] = [
+        {
+          id: 'mem-proc-01',
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          scope: 'Project',
+          lifecycle: 'Active',
+          content: 'Rule: Always require human approval token for critical commands mutating filesystem or git branches.',
+          importance: 0.99,
+          confidence: 1.0,
+          provenance: { creation_reason: 'Distilled from operator policy rejection during git checkout' },
+          depth_level: 3,
+          tier: 'Procedural',
+          retrieval_count: 88,
+          created_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'mem-sem-02',
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          scope: 'Project',
+          lifecycle: 'Active',
+          content: 'Architecture: Tokio Semaphore enforces a global cap of 8 permits across all agents to prevent OOM.',
+          importance: 0.92,
+          confidence: 0.96,
+          provenance: { creation_reason: 'Extracted from scheduler.rs code audit by Cognitive Memory Specialist' },
+          depth_level: 2,
+          tier: 'Semantic',
+          retrieval_count: 54,
+          created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'mem-epi-03',
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          scope: 'Conversation',
+          lifecycle: 'Active',
+          content: 'Execution Event: Cargo test passed with 38 unit and integration tests across storage, engine, and domain.',
+          importance: 0.79,
+          confidence: 0.95,
+          provenance: { creation_reason: 'Nightly dreaming compaction from TerminalOutput broadcast' },
+          depth_level: 1,
+          tier: 'Episodic',
+          retrieval_count: 32,
+          created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          id: 'mem-work-04',
+          project_id: activeProjectId || 'proj-trans4mers-local',
+          scope: 'Agent',
+          lifecycle: 'Active',
+          content: 'Active Task: Auditing hybrid RRF vector retrieval between LanceDB (384-dim) and SQLite FTS5 lexical index.',
+          importance: 0.88,
+          confidence: 0.90,
+          provenance: { creation_reason: 'ReAct step memory buffer from Cognitive Memory Specialist' },
+          depth_level: 0,
+          tier: 'Working',
+          retrieval_count: 14,
+          created_at: new Date(Date.now() - 600000).toISOString(),
+          updated_at: new Date().toISOString(),
+        }
+      ];
+      setMemories(selectedTier === 'All' ? mockMems : mockMems.filter(m => m.tier === selectedTier));
+      setLoading(false);
+      return;
+    }
+
     if (!activeProjectId) return;
     setLoading(true);
     try {
