@@ -50,7 +50,7 @@ flowchart TD
         Domain["core/trans4mers-domain (Entities, IDs, Events, Configs, Errors)"]
     end
 
-    Frontend <-->|Tauri IPC (Commands & Events)| TauriShell
+    Frontend <-->|"Tauri IPC: Commands and Events"| TauriShell
     TauriShell --> App
     App --> Engine
     Engine --> Storage
@@ -83,11 +83,11 @@ sequenceDiagram
     autonumber
     participant Agent as Agent Execution
     participant AppState as AppState
-    participant DB as SQLite DB (Mutex<Connection>)
+    participant DB as SQLite DB
     participant Projector as EventProjector
-    participant Bus as EventBus (Tokio Broadcast)
-    participant Forwarder as EventForwarder (IPC)
-    participant UI as Desktop UI (Zustand Stores)
+    participant Bus as EventBus
+    participant Forwarder as EventForwarder
+    participant UI as Desktop UI
 
     Agent->>AppState: commit_event(DomainEvent, ActorId)
     AppState->>DB: Begin Write Transaction (WAL Mode)
@@ -160,32 +160,32 @@ flowchart TD
     ContextCompaction -->|No| LLMInference[Call LLM Provider via Streaming API]
     RunCompactor --> LLMInference
 
-    LLMInference --> ParseThought[Parse Thought & Tool Invocations]
+    LLMInference --> ParseThought["Parse Thought and Tool Invocations"]
     ParseThought --> ToolDecision{Tool Call Emitted?}
     
-    ToolDecision -->|No / Complete| CompleteTask[Complete Task & Post Summary]
+    ToolDecision -->|No / Complete| CompleteTask["Complete Task and Post Summary"]
     ToolDecision -->|Yes| PolicyCheck{Evaluate PolicyEngine}
 
-    PolicyCheck -->|Deny| RejectTool[Inject Policy Violation into Context]
-    PolicyCheck -->|Ask| HumanGate[Generate ActionDiff & Yield Permit]
-    PolicyCheck -->|Allow| ExecuteTool[Acquire File Lock & Execute Tool]
+    PolicyCheck -->|Deny| RejectTool["Inject Policy Violation into Context"]
+    PolicyCheck -->|Ask| HumanGate["Generate ActionDiff and Yield Permit"]
+    PolicyCheck -->|Allow| ExecuteTool["Acquire File Lock and Execute Tool"]
 
     HumanGate --> HumanResolution{Operator Decision}
     HumanResolution -->|Approved| ExecuteTool
-    HumanResolution -->|Rejected| InjectFeedback[Feed Operator Feedback into Next Turn]
-    HumanResolution -->|Teach Rule| DistillRule[Store Rule in Procedural Memory]
+    HumanResolution -->|Rejected| InjectFeedback["Feed Operator Feedback into Next Turn"]
+    HumanResolution -->|Teach Rule| DistillRule["Store Rule in Procedural Memory"]
     DistillRule --> InjectFeedback
 
     ExecuteTool --> ToolResult{Execution Result}
-    ToolResult -->|Success| CommitObs[Commit Observation Event]
-    ToolResult -->|Transient Failure| BackoffRetry[Exponential Backoff + Jitter]
-    ToolResult -->|Logic Failure| SelfHeal[Feed Error Trace to LLM to Self-Correct]
+    ToolResult -->|Success| CommitObs["Commit Observation Event"]
+    ToolResult -->|Transient Failure| BackoffRetry["Exponential Backoff + Jitter"]
+    ToolResult -->|Logic Failure| SelfHeal["Feed Error Trace to LLM to Self-Correct"]
 
     BackoffRetry --> ExecuteTool
     SelfHeal --> AssembleContext
     InjectFeedback --> AssembleContext
     RejectTool --> AssembleContext
-    CommitObs --> IncrementStep[Increment Step Counter & Check Budget]
+    CommitObs --> IncrementStep["Increment Step Counter and Check Budget"]
     IncrementStep --> LLMInference
 ```
 
@@ -275,7 +275,7 @@ flowchart LR
     end
 
     subgraph Deb ["Adversarial Debate Pattern"]
-        Prop["Proponent Agent"] <-->|Rounds 1..N| Opp["Opponent Agent"]
+        Prop["Proponent Agent"] <-->|"Rounds 1 to N"| Opp["Opponent Agent"]
         Prop --> Synth["Synthesis / Consensus Judge"]
         Opp --> Synth
     end
@@ -342,7 +342,7 @@ sequenceDiagram
     participant Policy as PolicyEngine
     participant DiffReview as DiffReviewer
     participant DB as Project DB
-    participant UI as Diff Review Drawer (Operator)
+    participant UI as Diff Review Drawer
 
     Agent->>Policy: evaluate_policy(agent_id, capability, tool, arguments)
     alt Policy == Allow
@@ -425,12 +425,12 @@ flowchart TD
             SwarmCanvas["Visual Swarm Map (ReactFlow Canvas)"]
             DiffDrawer["Side-by-Side Diff Review Drawer"]
             MonacoPane["Monaco Code Editor & File Tree"]
-            TerminalPane["PTY Terminal Shell (@xterm/xterm)"]
+            TerminalPane["PTY Terminal Shell: xterm.js"]
             MirrorPane["CDP Browser Live Mirror"]
         end
     end
 
-    TauriEvents["Tauri Event Stream: 'domain_event'"] --> Stores
+    TauriEvents["Tauri Event Stream: domain_event"] --> Stores
     Stores --> Components
 ```
 
