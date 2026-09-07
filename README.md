@@ -78,13 +78,14 @@ Every state transition writes to an append-only event log before updating databa
       <p align="center"><i>Agents write and refactor code directly on disk with live Monaco editor inspection and zero-scope filesystem protection.</i></p>
     </td>
   </tr>
+  <tr>
+    <td colspan="2" valign="top">
+      <h3 align="center">Hybrid BM25 + Vector Document RAG Substrate</h3>
+      <a href="assets/screenshots/06_local_document_rag.png"><img src="assets/screenshots/06_local_document_rag.png" alt="Document and Code RAG Substrate" width="100%" /></a>
+      <p align="center"><i>Local codebase and documentation indexing via Reciprocal Rank Fusion (RRF) combining SQLite FTS5 lexical ranking and dense vector embeddings.</i></p>
+    </td>
+  </tr>
 </table>
-
-<div align="center">
-  <h3>System Control Plane Architecture</h3>
-  <a href="assets/screenshots/01_system_architecture.png"><img src="assets/screenshots/01_system_architecture.png" alt="Trans4mers System Architecture Diagram" width="95%" /></a>
-  <p><i>High-level topology of the async Tokio ReAct loop, 4-tier cognitive memory, and zero-trust tool executors.</i></p>
-</div>
 
 ---
 
