@@ -1,14 +1,14 @@
 # Memory, Cognitive Pyramid & Hybrid RAG Architecture
 
-This document provides a line-by-line, physically reverse-engineered architectural specification of the Memory Subsystem, the 4-Tier Cognitive Pyramid, Vector Serialization, Hybrid Reciprocal Rank Fusion (RRF), Okapi BM25 Ranking, Document RAG Chunking, and Background Consolidation in Trans4mers.
+This document covers the implementation of the Trans4mers memory subsystem: the four-tier cognitive pyramid, vector serialization, hybrid Reciprocal Rank Fusion (RRF), Okapi BM25 ranking, document chunking, and background consolidation.
 
 ---
 
 ## 1. Architectural Overview & Storage Topology
 
-Trans4mers separates persistent state across two distinct database tiers:
-1. **Global Database (`global.sqlite`)**: System configuration, provider credentials in OS Keyring, project registry, global agent definitions, and cross-project policies.
-2. **Project Database (`.trans4mers/project.sqlite`)**: Workspace events, conversations, agent executions, the 4-tier cognitive memory pyramid, document chunks, and vector index tables.
+Trans4mers separates persistent state across two database tiers:
+- The global database (`global.sqlite`) stores system configuration, provider credentials in the OS keyring, the project registry, global agent definitions, and cross-project policies.
+- The project database (`.trans4mers/project.sqlite`) stores workspace events, conversations, agent executions, the four-tier cognitive memory pyramid, document chunks, and vector index tables.
 
 ```mermaid
 flowchart TD
@@ -209,13 +209,13 @@ $$\mathrm{Score}_{\mathrm{dense}} = \frac{1.0}{1.0 + \max(0.0, \mathrm{distance}
 ## 6. Document Chunking & Ingestion Engine (`document_chunker.rs`)
 
 ### 6.1 Chunking Strategy by Extension
-- **Markdown** (`.md`, `.markdown`, `.mdx`): Splits on headers (`# `, `## `, `### `, `#### `) with $\ge 80$ token minimum before split, hard ceiling at $800$ tokens.
-- **Code** (`.rs`, `.py`, `.ts`, `.go`, `.java`, etc.): Splits on top-level function and type definitions (`fn `, `def `, `class `, `struct `, `impl `, `trait `) with $\ge 60$ token minimum, hard ceiling at $750$ tokens.
-- **Text / Other**: Splits on paragraph blank lines with $\ge 100$ token minimum, hard ceiling at $600$ tokens.
+- Markdown files (`.md`, `.markdown`, `.mdx`): split on headings (`# `, `## `, `### `, `#### `) with an 80-token minimum before a split and an 800-token ceiling.
+- Source code files (`.rs`, `.py`, `.ts`, `.go`, `.java`, etc.): split on top-level function and type declarations (`fn `, `def `, `class `, `struct `, `impl `, `trait `) with a 60-token minimum and 750-token ceiling.
+- Plain text and other extensions: split on blank lines with a 100-token minimum and 600-token ceiling.
 
 ### 6.2 Token Estimation & Sliding Window
-- Token counting uses BPE tokenization via `tiktoken_rs::cl100k_base()`, with a fast heuristic fallback ($\text{chars} / 4$).
-- **Audited Characteristic**: The current implementation of `DocumentChunker` utilizes non-overlapping partitions (`current_chunk_lines.clear()`). Sliding window overlap is $0$ tokens.
+- Token counting uses BPE tokenization via `tiktoken_rs::cl100k_base()`, with a heuristic character fallback (`chars / 4`).
+- `DocumentChunker` uses non-overlapping partitions (`current_chunk_lines.clear()`), meaning sliding window overlap is zero tokens.
 
 ### 6.3 Incremental Deduplication
 1. Computes SHA-256 digest of whole file content.
@@ -227,14 +227,14 @@ $$\mathrm{Score}_{\mathrm{dense}} = \frac{1.0}{1.0 + \max(0.0, \mathrm{distance}
 ## 7. Background Consolidation: Nightly Dreaming & Distillation
 
 ### 7.1 Nightly Dreaming (`nightly_dreaming.rs`)
-- **Schedule**: Evaluates hourly; triggers at **3:00 AM** local time if enabled.
-- **Credit Protection Guard**: Requires local Ollama (`qwen2.5-coder:3b`) or explicit custom model setting. If Ollama is offline and no custom model is configured, **aborts immediately** to prevent unwanted cloud API charges.
-- **Consolidation**: Scans conversations from the past 24 hours, prompts LLM to extract durable heuristics, and persists new entries into `learned_rules`.
+- The dreaming worker evaluates hourly and triggers at 3:00 AM local time when enabled.
+- It requires local Ollama (`qwen2.5-coder:3b`) or an explicit custom model configuration. If Ollama is offline and no custom model is configured, the worker halts immediately to avoid unbudgeted cloud API charges.
+- It scans conversations from the past 24 hours, prompts the model to extract reusable heuristics, and saves new entries into `learned_rules`.
 
 ### 7.2 Cognitive Distillation Engine (`distillation_engine.rs`)
-- **Schedule**: Executes every 60 seconds within the housekeeping loop.
-- **Marker Tracking**: Uses `conversation_distillation_markers` to record progress. Identifies conversations with new messages after `last_distilled_at` with dialogue inactivity $> 30$ seconds.
-- **Fact Extraction**: Prompts LLM to extract facts, deduplicates via SHA-256 `content_hash`, and reinforces existing memories by increasing importance ($+0.1$) on repeated observations.
+- The distillation engine runs every 60 seconds inside the housekeeping loop.
+- Progress is tracked through `conversation_distillation_markers`. It checks for conversations with new messages after `last_distilled_at` where conversation inactivity exceeds 30 seconds.
+- The model extracts facts, deduplicates them by SHA-256 `content_hash`, and bumps the importance score (+0.1) when recurring facts are seen.
 
 ---
 
@@ -242,7 +242,7 @@ $$\mathrm{Score}_{\mathrm{dense}} = \frac{1.0}{1.0 + \max(0.0, \mathrm{distance}
 
 Under the brutal honesty rule of `GEMINI.md`, the audit identified the following verified implementation characteristics:
 
-1. **`Candidate` Lifecycle State Behavior**: `DistillationEngine` writes new memories with lifecycle `'Candidate'`, while retrieval queries in `memory_engine.rs` explicitly enforce `m.lifecycle = 'Persisted'`. Memories remain in candidate status until explicitly validated.
-2. **Pruning Vector Deletions**: When `memory_tier_promoter.rs` purges stale episodic memories, it executes SQL `DELETE FROM project_memories`. Dedicated index re-indexing or vacuuming cleans up the corresponding `vec0` rows.
-3. **Dreaming Embeddings**: The Nightly Dreaming worker inserts extracted rules into `learned_rules` where SQLite triggers populate `learned_rules_fts`. Full-text search is immediately available; dense vector indexing is populated upon next vector store re-index.
-4. **`global_memories` Schema**: The global database maintains `global_memories` and `global_memories_fts` tables for system-wide knowledge sharing, with project-specific memories isolated in individual project databases.
+1. The distillation engine writes new memories with lifecycle status `'Candidate'`, while retrieval queries in `memory_engine.rs` filter on `m.lifecycle = 'Persisted'`. Memories remain candidates until explicitly validated.
+2. When `memory_tier_promoter.rs` purges stale episodic memories, it executes `DELETE FROM project_memories`. SQLite handles the relational deletion, and vector store indices update on the next re-indexing cycle.
+3. The nightly dreaming worker inserts rules into `learned_rules`, triggering SQLite triggers that immediately populate `learned_rules_fts`. Lexical search is instantly available, while dense vector representations are generated on subsequent vector re-indexing.
+4. The global database maintains separate `global_memories` and `global_memories_fts` tables for system-wide knowledge, while project-specific memories remain isolated in their respective project databases.

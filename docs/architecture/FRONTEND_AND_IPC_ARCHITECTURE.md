@@ -1,12 +1,12 @@
 # Desktop Shell, State Projection & Tauri IPC Bridge Architecture
 
-This document provides a line-by-line, physically reverse-engineered architectural specification of the Trans4mers Desktop Shell, its 22 Tauri IPC command modules, the `EventForwarder` Tokio-to-WebView bridge, reactive Zustand state management, and the zero-scope security boundary.
+This document details the Trans4mers desktop shell: the 22 Tauri IPC command modules, the `EventForwarder` Tokio-to-WebView bridge, reactive Zustand state management, and the zero-scope security boundary.
 
 ---
 
 ## 1. Architectural Overview & IPC Topology
 
-Trans4mers Desktop is structured as a **Sovereign CQRS/Event-Sourced Desktop System** linking a high-performance native Rust core (Tauri v2 + Tokio) with a reactive TypeScript frontend (React 18 + Vite + Zustand + Monaco + xterm.js + ReactFlow):
+Trans4mers Desktop links a native Rust core (Tauri v2 and Tokio) with a TypeScript frontend (React 18, Vite, Zustand, Monaco Editor, and xterm.js) using an event-sourced CQRS architecture:
 
 ```mermaid
 flowchart TD
@@ -45,7 +45,7 @@ flowchart TD
 
 ---
 
-## 2. Exhaustive Catalog of All 22 Tauri IPC Command Modules
+## 2. Catalog of Tauri IPC Command Modules
 
 All commands are registered in `apps/desktop/src-tauri/src/main.rs` via `tauri::generate_handler!`:
 

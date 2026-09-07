@@ -1,6 +1,6 @@
 # Zero-Trust Governance & Security Policy Architecture
 
-This document provides a line-by-line, physically reverse-engineered architectural specification of the Zero-Trust Governance Subsystem, the Capability Lattice, the DiffReviewer Trust Layer, Anti-TOCTOU Canonical Argument Hashing, Advisory File Leases, and Procedural Rule Distillation in Trans4mers.
+This document covers the implementation of the Trans4mers zero-trust governance layer: the capability lattice, diff review engine, anti-TOCTOU argument hashing, advisory file locks, and procedural rule distillation.
 
 ---
 
@@ -37,10 +37,10 @@ pub enum EffectClass {
     Unknown,
 }
 ```
-- **`ReadOnly`**: Causes zero side-effects on external state ($S' = S$). Candidate for safe autonomous execution (e.g. `filesystem.read`, `git.status`, `memory.search`).
-- **`IdempotentMutation`**: Applying the tool multiple times with identical arguments produces the exact same outcome as a single execution ($f(f(x)) = f(x)$) (e.g. `filesystem.write`, `memory.insert`).
-- **`NonIdempotentMutation`**: Mutates state cumulatively ($f(f(x)) \neq f(x)$) (e.g. `terminal.execute`, `git.push`, `complete_task`).
-- **`Unknown`**: Untrusted or unclassified third-party plugin or MCP tool. Default action is always forced to `Ask`.
+- `ReadOnly`: causes no side-effects on external state ($S' = S$). Safe for autonomous execution (for example: `filesystem.read`, `git.status`, `memory.search`).
+- `IdempotentMutation`: executing the tool multiple times with identical arguments yields the same state as executing it once ($f(f(x)) = f(x)$) (for example: `filesystem.write`, `memory.insert`).
+- `NonIdempotentMutation`: mutates state cumulatively ($f(f(x)) \neq f(x)$) (for example: `terminal.execute`, `git.push`, `complete_task`).
+- `Unknown`: untrusted or unclassified third-party plugin or MCP tool. Always forces human review (`Ask`).
 
 ### 1.2 `RiskLevel` (Potential Blast Radius)
 ```rust
@@ -90,14 +90,11 @@ flowchart TD
 ```
 
 ### Precedence Invariants
-1. **Rule 1 (Absolute Veto / DENY-Wins)**:
-   If `AgentScope == Deny` $\lor$ `ProjectScope == Deny` $\lor$ `GlobalScope == Deny` $\rightarrow$ Outcome is **`Deny`**. No exception or lower-level configuration can override an explicit `Deny`.
-2. **Rule 2 (Restrictive Precedence / ASK-Interception)**:
-   If no layer denied, but any layer specifies `Ask` $\rightarrow$ Outcome is **`Ask`**.
-3. **Rule 3 (Explicit Allow)**:
-   If no layer denied or asked, and any surviving layer explicitly specifies `Allow` $\rightarrow$ Outcome is **`Allow`**.
-4. **Rule 4 (Zero-Trust Fallback)**:
-   If no policy rows match any required capabilities, the engine falls back to evaluating the tool's intrinsic `EffectClass` and `RiskLevel`. Any mutation above `Low` risk or with `Unknown` classification forces an **`Ask`** outcome.
+
+1. **Explicit Deny**: if any scope (agent, project, or global) evaluates to `Deny`, the request is denied immediately. No lower-level rule or permission can override a `Deny`.
+2. **Operator Review**: if no scope denied the request but any scope specifies `Ask`, the engine pauses execution and emits an approval request.
+3. **Explicit Allow**: if no scope denied or asked, and an active scope explicitly grants `Allow`, the tool executes autonomously.
+4. **Fallback Evaluation**: if no policy rules match, the engine falls back to the tool's intrinsic `EffectClass` and `RiskLevel`. Any mutation above `Low` risk or with an `Unknown` effect class requires human approval.
 
 ---
 

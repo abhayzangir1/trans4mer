@@ -1,12 +1,12 @@
 # Trans4mers Master System Architecture Specification
 
-Welcome to the definitive architecture specification for **Trans4mers**, a sovereign multi-agent desktop operating system built in Rust and React/Tauri v2. This document provides the high-level system topology and architectural boundaries, and serves as the master index linking to five specialized, line-by-line reverse-engineered subsystem architecture specifications.
+Trans4mers is a sovereign multi-agent desktop operating system built in Rust and React with Tauri v2. This document outlines the system topology, crate boundaries, and execution models, and serves as an index to the five subsystem specifications.
 
 ---
 
-## Dedicated Subsystem Architecture Specifications
+## Subsystem Architecture Specifications
 
-For unabridged, line-by-line technical deep-dives into specific subsystems, consult the dedicated architecture specifications:
+For detailed technical dives into specific subsystems, consult the dedicated architecture specifications:
 
 | Subsystem | Specification Document | Primary Scope & Contents |
 | :--- | :--- | :--- |
@@ -64,18 +64,18 @@ flowchart TD
 
 ### Architectural Boundaries & Invariants
 
-1. **`trans4mers-domain`**: The bedrock crate. Contains pure data structures, strongly-typed identifiers ([`ProjectId`](../core/trans4mers-domain/src/ids.rs), [`ExecutionId`](../core/trans4mers-domain/src/ids.rs), [`AgentInstanceId`](../core/trans4mers-domain/src/ids.rs)), the canonical [`DomainEvent`](../core/trans4mers-domain/src/event.rs) enum, and the capability lattice.
-2. **`trans4mers-storage`**: Persistence substrate. Contains raw SQL migration scripts ([`global`](../core/trans4mers-storage/src/migrations/global/) and [`project`](../core/trans4mers-storage/src/migrations/project/)), single-writer transaction wrappers, repository query implementations, and vector store adapters (`SqliteVecStore` and `LanceDbStore`).
-3. **`trans4mers-providers`**: Stateless inference and external protocol drivers. Trait implementations for Ollama, Anthropic, OpenAI, Google Gemini, Chromium DevTools Protocol (CDP), and the Model Context Protocol (MCP).
-4. **`trans4mers-engine`**: Operational execution engine. Manages the concurrency scheduler, the ReAct agent execution loop, the hybrid RAG retrieval pipeline, memory tier transitions, swarm debates, and the workspace worktree router.
-5. **`trans4mers-app`**: Bridges Rust engine services to Tauri IPC handlers. Houses 22 distinct command modules and the [`EventForwarder`](../core/trans4mers-app/src/event_forwarder.rs) background emitter.
-6. **`apps/desktop`**: Cross-platform desktop UI constructed with React 18, Zustand, TailwindCSS, `@xterm/xterm`, and `@monaco-editor/react`.
+1. **`trans4mers-domain`** contains pure data structures, strongly-typed identifiers ([`ProjectId`](../core/trans4mers-domain/src/ids.rs), [`ExecutionId`](../core/trans4mers-domain/src/ids.rs), [`AgentInstanceId`](../core/trans4mers-domain/src/ids.rs)), the canonical [`DomainEvent`](../core/trans4mers-domain/src/event.rs) enum, and the capability lattice. It has no external I/O dependencies.
+2. **`trans4mers-storage`** handles persistence, including raw SQL migration scripts ([`global`](../core/trans4mers-storage/src/migrations/global/) and [`project`](../core/trans4mers-storage/src/migrations/project/)), single-writer transaction wrappers, repository query implementations, and vector store adapters (`SqliteVecStore` and `LanceDbStore`).
+3. **`trans4mers-providers`** provides stateless inference and external protocol drivers, implementing traits for Ollama, Anthropic, OpenAI, Google Gemini, Chromium DevTools Protocol (CDP), and the Model Context Protocol (MCP).
+4. **`trans4mers-engine`** contains the operational execution engine: the concurrency scheduler, the ReAct agent execution loop, the hybrid RAG retrieval pipeline, memory tier transitions, swarm debates, and the workspace worktree router.
+5. **`trans4mers-app`** bridges Rust engine services to Tauri IPC handlers, housing 22 distinct command modules and the [`EventForwarder`](../core/trans4mers-app/src/event_forwarder.rs) background emitter.
+6. **`apps/desktop`** is the cross-platform desktop UI built with React 18, Zustand, TailwindCSS, `@xterm/xterm`, and Monaco Editor.
 
 ---
 
 ## 2. Event-Sourced CQRS & Durability Subsystem
 
-Trans4mers rejects traditional CRUD architectures in favor of an **Event-Sourced Command Query Responsibility Segregation (CQRS)** pattern. The single source of truth for the entire operating system is the append-only `events` ledger.
+Trans4mers uses an Event-Sourced Command Query Responsibility Segregation (CQRS) pattern rather than direct CRUD writes. The single source of truth for the entire operating system is the append-only `events` ledger.
 
 ### Write Path: Atomic Commit & Projection Loop
 

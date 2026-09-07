@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <strong>A zero-cloud, event-sourced, crash-resilient multi-agent operating system running 100% locally on your workstation.</strong>
+  <strong>Local, event-sourced multi-agent desktop application running on your workstation.</strong>
 </p>
 
 <p align="center">
@@ -32,19 +32,17 @@
 
 ## Overview
 
-**Trans4mers** is a desktop operating system for autonomous AI agents built from the ground up with **zero mandatory cloud dependencies**, **provable crash resilience**, and **strict zero-trust human governance**. 
+Trans4mers is a local desktop application for running autonomous agent swarms on your own computer. It combines an asynchronous Rust engine with local Ollama inference, an embedded SQLite database using `sqlite-vec`, and a native Tauri v2 desktop shell.
 
-Unlike conventional agent wrappers that pipe your sensitive code to remote cloud APIs, Trans4mers runs completely offline on your workstation. It pairs **local LLM execution (Ollama)** with an embedded **SQLite + sqlite-vec** database and a native **Rust (Tauri 2) + React** desktop shell.
-
-Every state mutation—from tool invocations and peer inbox messages to file modifications and memory decay—is committed to an **immutable append-only event store** before being projected into SQLite state tables. If the system is abruptly terminated mid-task (kill -9 or power outage), the engine automatically recovers on restart, replays pending events, and continues execution seamlessly without data loss.
+Every state transition writes to an append-only event log before updating database tables. If the application gets terminated mid-task, the engine reads the log on next startup, replays pending events, and picks up where it stopped. Dangerous actions like writing files outside scratch, executing shell commands, or changing database rules pause for operator review.
 
 ---
 
 ## Quick Start & One-Click Install
 
-### 1. Download Native Installer (Zero Friction)
+### 1. Download Native Installer
 
-Download the pre-compiled installer for your operating system directly from [**GitHub Releases**](https://github.com/abhayzangir1/trans4mer/releases/latest):
+Download the pre-compiled installer for your operating system from [**GitHub Releases**](https://github.com/abhayzangir1/trans4mer/releases/latest):
 
 | Platform | Installer Package | Distribution Type |
 | :--- | :--- | :--- |
@@ -54,51 +52,48 @@ Download the pre-compiled installer for your operating system directly from [**G
 
 ---
 
-### 2. One-Click Developer Launch (Windows)
+### 2. Launch with Helper Script (Windows)
 
-If you have cloned the repository, launch Trans4mers immediately via the automated root runner:
+If you cloned the source code, run the startup script:
 
 ```bat
 .\run-app.bat
 ```
 
-> **What `run-app.bat` does automatically:**
-> 1. Detects if the local Ollama daemon is active; if not, starts it automatically in the background.
-> 2. Verifies the Vite desktop frontend server on `http://localhost:1420`.
-> 3. Launches the native `trans4mers-desktop.exe` binary.
+The script checks if an Ollama daemon is active, launches it if missing, checks the local Vite dev server on port 1420, and starts the desktop shell.
 
 ---
 
-### 3. Model Engine: Sovereign Local & Frontier BYOK <a id="model-setup"></a>
+### 3. Model Engine: Local & Frontier BYOK <a id="model-setup"></a>
 
-Trans4mers is strictly **model-agnostic**. It automatically discovers models in your environment and gives you complete autonomy over the reasoning engines powering your swarms:
+Trans4mers works with local inference endpoints as well as commercial APIs:
 
-- **Capable Local Workstation Execution (Ollama):** For 100% sovereign, private offline execution, Trans4mers integrates with any local Ollama endpoint. For heavy multi-agent workflows, refactoring, and multi-step tool calling, capable high-parameter models (such as `qwen2.5-coder:32b`, `deepseek-r1:32b+`, `llama3.3:70b`, or custom GGUFs) deliver rigorous reasoning without cloud data leakage.
-- **Frontier Cloud BYOK (Bring Your Own Key):** When tasks demand frontier intelligence (such as Anthropic Claude 3.7 Sonnet / Opus, OpenAI o1 / o3-mini / GPT-4.5, or Google Gemini 2.0 Pro / Flash), you can enter your API keys directly into **Settings**. Keys are vaulted exclusively in your workstation's local OS Keyring (Windows Credential Manager / macOS Keychain / Linux Secret Service) and executed directly from your workstation with zero proxying or telemetry.
-- **Per-Agent Model Specialization:** In the Swarm Designer, assign different models to different agent archetypes—for example, pairing local models for fast terminal and RAG sub-agents with frontier reasoning engines for the Lead Architect and Security Auditor.
+- Local Workstation Execution (Ollama): For private offline runs, connect to a local Ollama daemon. Large models such as `qwen2.5-coder:32b`, `deepseek-r1:32b`, or `llama3.3:70b` handle complex tool-calling and refactoring tasks without leaking data.
+- Cloud BYOK: When a task needs larger frontier models, you can enter API keys for Anthropic, OpenAI, or Google in Settings. Keys are stored in the operating system credential store (Windows Credential Manager, macOS Keychain, or Linux Secret Service) and requests go directly to the provider endpoints.
+- Per-Agent Model Routing: You can assign specific models to specific agent roles in the Swarm Designer. For example, a small local model can handle terminal commands while a larger model handles system design and code reviews.
 
 ---
 
 ## Core Capabilities
 
-- **100% Local Sovereign Privacy:** No remote server telemetry, no tracking, no mandatory cloud subscriptions. Your code and prompts never leave your machine.
-- **Event-Sourced CQRS Architecture:** All operations pass through commit_event, projecting state synchronously into SQLite relational tables and broadcasting via Tauri IPC to the UI.
-- **Self-Healing ReAct Runtime:** Exponential backoff on transient errors, automatic context compaction when nearing token limits, and secondary model fallback routing.
-- **Multi-Agent Swarm Designer:** Dynamic orchestration supporting **Supervisor-Worker**, **Adversarial Debate**, and **Concurrent Fan-Out** patterns.
-- **Zero-Trust Diff Review & Human Approvals:** High-risk actions (file modifications, bash execution, external network calls) require explicit operator approval with canonical SHA-256 argument hashing and line-by-line hunk review.
-- **4-Tier Cognitive Memory Pyramid:** Working, Episodic, Semantic, and Procedural memory tiers powered by SQLite FTS5 BM25 search and embedded sqlite-vec vector similarity.
-- **Real-Time PTY Terminal:** Native duplex terminal sessions powered by portable-pty embedded directly into the workspace with xterm.js.
-- **Chrome DevTools Protocol (CDP) Browser Spaces:** Isolated browser execution with per-space profiles, DOM snapshot history, and real-time live mirror rendering.
-- **Document & Code RAG Substrate:** Automatic chunking and hybrid lexical/vector indexing across your entire project workspace.
-- **Interactive Artifact Deliverables:** Markdown briefs, specifications, and code deliverables with threaded, line-anchored operator feedback.
-- **Continuous Scheduled Automations & Nightly Dreaming:** Cron-based autonomous background agent loops and nightly memory consolidation worker.
-- **Model Context Protocol (MCP) Client & Inspector:** Full MCP client support with secure credential vaulting, live protocol traffic logging, and integrated Node.js MCP Inspector.
+- All data and prompts stay on your workstation with zero external telemetry.
+- State updates use event-sourced CQRS over SQLite, publishing domain events to the desktop interface over Tauri IPC.
+- ReAct loops handle transient network errors with exponential backoff and prune context when tokens approach window limits.
+- The Swarm Designer supports supervisor-worker hierarchies, two-agent adversarial debates, and parallel fan-out tasks.
+- High-risk operations (modifying files, running shell scripts, external requests) generate unified diffs and pause for approval with canonical SHA-256 argument verification.
+- Memory is split across four tiers (working, episodic, semantic, procedural) searched with SQLite FTS5 BM25 and dense vector similarity.
+- Duplex terminal sessions run through `portable-pty` and display in an embedded `xterm.js` window.
+- Browser automation controls sandboxed Chromium profiles using the Chrome DevTools Protocol, with point-in-time snapshot rollbacks.
+- Document RAG parses repository files into chunks for hybrid lexical and vector search.
+- Artifact panels let you read generated design docs and post inline comments that turn into agent tasks.
+- Background workers support cron schedules and run a memory consolidation routine at 3:00 AM.
+- The Model Context Protocol client handles both stdio and SSE connections, with an in-app traffic log and inspector window.
 
 ---
 
 ## Architecture
 
-> 📖 **Deep-Dive Engineering Specification:** For full architectural blueprints across all 8 subsystems (Crate Topology, Event-Sourced CQRS, Runtime Loop, Swarm Topologies, 4-Tier Memory Pyramid, Zero-Trust Policy Engine, PTY/CDP/MCP Subsystems, and Desktop Shell), read the [**Trans4mers System Architecture Reference (docs/ARCHITECTURE.md)**](docs/ARCHITECTURE.md).
+For complete technical specifications across all subsystems, read the [**Master System Architecture Specification (docs/ARCHITECTURE.md)**](docs/ARCHITECTURE.md).
 
 ```mermaid
 flowchart TB
@@ -146,52 +141,51 @@ flowchart TB
 
 ---
 
-## Subsystem Deep Dives
+## Subsystem Highlights
 
-### 1. Sovereign ReAct Runtime & Self-Healing
-Each agent executes a strict Thought $\to$ Action $\to$ Observation cycle. When an LLM inference fails due to context limits, rate throttling, or invalid JSON output, the built-in self-healing substrate kicks in:
-- **Exponential Backoff:** Retries transient failures gracefully with jitter.
-- **Context Compaction:** Automatically condenses working conversation history while preserving semantic rules and active goals.
-- **Model Fallback:** Switches to secondary configured models when an endpoint is unreachable or budget-exhausted.
+### 1. ReAct Runtime and Error Recovery
+Each agent runs a Thought-Action-Observation loop. When an LLM inference fails due to context limits, rate throttling, or bad JSON formatting:
+- The engine retries transient failures using exponential backoff with jitter.
+- Context compaction summarizes older conversational turns while retaining learned rules and goals.
+- If an endpoint fails repeatedly, the runtime falls back to secondary configured models.
 
-### 2. Visual Swarm Map & Collaboration Patterns
-Deploy dynamic teams of agents with specialized archetypes (Architect, Senior Engineer, Security Reviewer, QA, Researcher):
-- **Adversarial Debate:** Proponent and Critic agents iterate through structured arguments to eliminate blind spots and stress-test technical proposals.
-- **Supervisor Orchestration:** A lead agent decomposes complex goals into sequential milestones and delegates them to worker agents with independent execution locks.
-- **Parallel Fan-Out:** Distributes independent search, analysis, or refactoring tasks across multiple workers simultaneously and synthesizes the results.
+### 2. Multi-Agent Swarms
+You can assign agents specific roles (architect, engineer, security auditor, researcher):
+- Adversarial Debate pairs a proponent and a critic across structured rounds to catch flaws before code gets written.
+- Supervisor Orchestration lets a lead agent break down a goal into sequential milestones and assign them to workers.
+- Parallel Fan-Out runs independent tasks across multiple workers concurrently and aggregates outputs.
 
-### 3. 4-Tier Cognitive Memory Pyramid
-Memory is structured into 4 distinct cognitive tiers:
-1. **Working Memory:** In-flight execution state and immediate conversational context.
-2. **Episodic Memory:** Checkpointed records of completed tasks, tool outputs, and user interactions.
-3. **Semantic Memory:** Extracted domain facts, codebase idioms, and architectural invariants indexed with sqlite-vec embeddings.
-4. **Procedural Memory:** Distilled behavioral rules, past fixes, and developer preferences learned over time.
+### 3. Cognitive Memory Pyramid
+Memory is organized into four levels based on lifespan and relevance:
+1. Working memory: in-flight conversation turns and ephemeral notes.
+2. Episodic memory: durable logs of finished tasks, tool outputs, and steps.
+3. Semantic memory: extracted facts and codebase invariants indexed with dense vectors.
+4. Procedural memory: learned constraints, bug fixes, and user preferences retained across sessions.
 
-### 4. Zero-Trust Diff Review & Security Approvals
-Trans4mers enforces strict isolation on dangerous capabilities:
-- Destructive file edits, terminal commands with risk level High, and external network requests generate an ActionDiff.
-- Execution halts, yields its concurrency permit, and awaits explicit human review in the **Diff Review Panel**.
-- Operators can inspect unified diffs line-by-line, accept or reject individual hunks, and approve execution with full audit provenance.
+### 4. Diff Review and Approval Gates
+Dangerous capabilities require human oversight:
+- File edits, elevated terminal commands, and external network calls generate an ActionDiff.
+- The agent yields its execution permit and waits for review in the Diff Review Panel.
+- Operators can review unified diffs line-by-line, accept or reject individual hunks, and approve execution.
 
-### 5. Browser Automation & Live Mirror
-Agents can navigate documentation, test web applications, and extract live web data via native Chrome DevTools Protocol (CDP):
-- Each browser space maintains an isolated profile directory in .trans4mers/browser_profiles/.
-- The **Live Mirror Viewport** mirrors DOM snapshots, HTTP status codes, and captured page state directly in the desktop interface.
-- Roll back to previous DOM checkpoints at any time with cryptographic tree hashing.
+### 5. Browser Automation and Viewport Mirror
+Agents can read web docs and test local web servers through Chrome DevTools Protocol:
+- Browser sessions use isolated profile directories in `.trans4mers/browser_profiles/`.
+- The Live Mirror tab renders DOM snapshots, status codes, and viewport state in the desktop interface.
+- You can roll back browser session state using stored directory tree hashes.
 
 ### 6. Deep Research Engine
-A 5-stage cited research pipeline:
-1. **Plan:** Deconstructs user inquiries into search facets.
-2. **Search:** Queries local codebase RAG, semantic memories, and privacy-respecting web search.
-3. **Extract:** Collects and indexes source statements with URL/file provenance.
-4. **Synthesize:** Combines evidence into structured technical analysis.
-5. **Cite:** Outputs footnoted Markdown reports and persists them as project artifacts.
+The research workflow breaks questions into sub-queries:
+1. Plans search facets based on the prompt.
+2. Searches the local codebase, memory tables, and web sources.
+3. Collects citations with file paths and URLs.
+4. Synthesizes findings into a Markdown report saved as an artifact.
 
 ---
 
-## Visual Themes & Customization
+## Visual Themes
 
-Trans4mers features high-contrast cybernetic styling designed for extended programming sessions:
+The desktop interface includes four visual themes:
 
 | Theme Variant | Preview | Accent Palette |
 | :--- | :--- | :--- |
@@ -204,7 +198,7 @@ Trans4mers features high-contrast cybernetic styling designed for extended progr
 
 ## Benchmarks & Resource Footprint
 
-Tested on standard developer workstations (Apple M-series, Intel Core i7 / AMD Ryzen 7, 16GB RAM):
+Measurements taken on developer workstations (Apple M-series, Intel Core i7 / AMD Ryzen 7, 16GB RAM):
 
 | Metric | Measured Value | Standard Cloud Competitors |
 | :--- | :--- | :--- |
@@ -230,7 +224,7 @@ trans4mers-local/
 ├── assets/
 │   └── branding/                # High-res logos and theme variants
 ├── core/
-│   ├── trans4mers-app/          # 23 IPC command modules & event forwarder
+│   ├── trans4mers-app/          # 22 IPC command modules & event forwarder
 │   ├── trans4mers-domain/       # Pure domain models, IDs, events, and config
 │   ├── trans4mers-engine/       # Scheduler, ReAct runtime, RAG, Swarms, PTY
 │   ├── trans4mers-providers/    # Ollama, OpenAI, Anthropic, Gemini, CDP, MCP
@@ -293,19 +287,19 @@ cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p t
 
 ## Documentation
 
-- [Product Requirements Document (PRD.md)](PRD.md) — Reverse-engineered product capabilities, personas, workflows, and constraints.
-- [Technical Requirements Document (TRD.md)](TRD.md) — Full technical specification, schemas, algorithms, IPC modules, and security invariants.
-- [System Architecture Reference (docs/ARCHITECTURE.md)](docs/ARCHITECTURE.md) — Master technical blueprint and dependency graph.
+- [Product Requirements Document (PRD.md)](PRD.md): Reverse-engineered product capabilities, personas, workflows, and operating constraints.
+- [Technical Requirements Document (TRD.md)](TRD.md): Technical specification covering schemas, algorithms, IPC modules, and security invariants.
+- [Master System Architecture Specification (docs/ARCHITECTURE.md)](docs/ARCHITECTURE.md): System dependency graph and cross-subsystem event flow.
   - [Memory & Cognitive RAG Architecture (docs/architecture/MEMORY_AND_RAG_ARCHITECTURE.md)](docs/architecture/MEMORY_AND_RAG_ARCHITECTURE.md)
   - [Agent Runtime & Swarm Architecture (docs/architecture/AGENT_AND_SWARM_ARCHITECTURE.md)](docs/architecture/AGENT_AND_SWARM_ARCHITECTURE.md)
   - [Zero-Trust Governance & Security Architecture (docs/architecture/GOVERNANCE_AND_SECURITY_ARCHITECTURE.md)](docs/architecture/GOVERNANCE_AND_SECURITY_ARCHITECTURE.md)
   - [External Protocols & Native Tooling Architecture (docs/architecture/PROTOCOLS_AND_TOOLING_ARCHITECTURE.md)](docs/architecture/PROTOCOLS_AND_TOOLING_ARCHITECTURE.md)
   - [Desktop Shell & Tauri IPC Bridge Architecture (docs/architecture/FRONTEND_AND_IPC_ARCHITECTURE.md)](docs/architecture/FRONTEND_AND_IPC_ARCHITECTURE.md)
-- [Architecture Decisions (docs/ARCHITECTURE_DECISIONS.md)](docs/ARCHITECTURE_DECISIONS.md) — Rationale for event sourcing, concurrency caps, and zero-trust gating.
-- [Agent Tutorial (docs/AGENT_TUTORIAL.md)](docs/AGENT_TUTORIAL.md) — Guide to authoring and deploying custom agent archetypes.
-- [Plugin Development (docs/PLUGIN_DEVELOPMENT.md)](docs/PLUGIN_DEVELOPMENT.md) — How to write external tools via JSON-RPC.
-- [Contributing Guide (docs/CONTRIBUTING.md)](docs/CONTRIBUTING.md) — Code standards, PR guidelines, and verification rules.
-- [Swarm Audit Report (docs/SWARM_AUDIT_REPORT.md)](docs/SWARM_AUDIT_REPORT.md) — Architectural integrity audit verification report.
+- [Architecture Decisions (docs/ARCHITECTURE_DECISIONS.md)](docs/ARCHITECTURE_DECISIONS.md): Design records for event sourcing, concurrency caps, and approval gating.
+- [Agent Tutorial (docs/AGENT_TUTORIAL.md)](docs/AGENT_TUTORIAL.md): Guide to creating and deploying custom agent archetypes.
+- [Plugin Development (docs/PLUGIN_DEVELOPMENT.md)](docs/PLUGIN_DEVELOPMENT.md): Writing external tools using JSON-RPC.
+- [Contributing Guide (docs/CONTRIBUTING.md)](docs/CONTRIBUTING.md): Code standards, pull request process, and verification rules.
+- [Swarm Audit Report (docs/SWARM_AUDIT_REPORT.md)](docs/SWARM_AUDIT_REPORT.md): Audit report covering physical code verification.
 
 ---
 

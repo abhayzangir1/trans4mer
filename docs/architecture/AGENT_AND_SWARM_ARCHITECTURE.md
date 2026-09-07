@@ -1,6 +1,6 @@
 # Multi-Agent Runtime & Swarm Orchestration Architecture
 
-This document provides a line-by-line, physically reverse-engineered architectural specification of the Multi-Agent Runtime, Concurrency Scheduler, Dynamic Delegation Engine, and Swarm Orchestration topologies in Trans4mers.
+This document details the Trans4mers multi-agent runtime, concurrency scheduler, dynamic delegation engine, and swarm orchestration topologies.
 
 ---
 
@@ -41,62 +41,32 @@ stateDiagram-v2
     MergeWorktree --> [*]
 ```
 
-### Line-by-Line Execution Mechanics
-1. **Permit Ownership & CQRS Start**:
-   - The runner receives `_permit: OwnedSemaphorePermit` proving an active scheduling slot, wrapped in `mut current_permit = Some(_permit)`.
-   - Emits and commits `DomainEvent::ExecutionStarted { execution_id, agent_instance_id }` via CQRS (`crate::cqrs::commit_event`), updating `agent_executions SET status = 'Running'` and broadcasting to both project and global event buses.
-2. **Step Iteration (Hard Cap: 25 Steps)**:
-   - **Cancellation Check**: Checks `if cancellation_token.is_cancelled()`.
-   - **Inbox Message Claim**:
-     - Calls `AgentInbox::claim_next(conn, agent_id)` inside a write transaction:
-       ```sql
-       SELECT * FROM inbox_messages
-       WHERE recipient_agent_id = ?1 AND delivery_state = 'QUEUED'
-       ORDER BY created_at ASC LIMIT 1
-       ```
-     - Emits `DomainEvent::InboxMessageClaimed`, extracts payload, formats prompt: `"User Instruction from {sender}: {content}"`, and immediately acknowledges via `AgentInbox::ack_message` (`DomainEvent::InboxMessageAcked`).
-   - **Durable Checkpointing**:
-     - Calls `CheckpointManager::save_checkpoint`: saves `generation`, `ExecutionPhase::LlmGeneration`, `last_event_sequence`, and full context snapshot `serde_json::to_value(&state)` to `execution_checkpoints`.
-   - **Context Compaction**:
-     - Calls `ContextCompactor::compact_if_needed`: if context tokens exceed trigger threshold (e.g. 75% of context window), prunes oldest steps and summarizes them.
-   - **RAG Memory Recall**:
-     - Synthesizes search query from system prompt and last 3 thoughts.
-     - Calls `provider.embed(&query_text, &model_config)`.
-     - Queries `MemoryEngine` for top 5 learned constraint rules and top 10 relevant episodic memories.
-   - **Grammar & Tool Manifest Assembly**:
-     - Inspects active `ToolExecutor` registry.
-     - Formats tools into JSON schema format.
-     - Synthesizes grammar constraint for models supporting structured output.
-   - **Context Prompt Construction**:
-     - Invokes `ContextEngine::assemble_prompt_with_context` to compile system prompt, memories, rules, loaded skills, node runtime status, and history into `Vec<LlmMessage>`.
-   - **Cost Guard Verification**:
-     - Queries `trans4mers_storage::repos::cost_repo::get_daily_cost` and `get_monthly_cost`.
-     - Enforces hard block if projected step cost exceeds configured financial caps.
-   - **Streaming LLM Generation**:
-     - Calls `provider.generate_stream(&request)`.
-     - Real-time `TextDelta` chunks emitted to event bus as `DomainEvent::TextDelta` for zero-latency UI streaming.
-     - `ToolCallDelta` chunks accumulated across argument fragments.
-     - On LLM failure, triggers self-healing retry loop. If `requires_context_compaction` is flagged, compacts context before retrying.
-     - Token counts persisted to `token_usage` and `cost_entries`.
-   - **Policy Interception & Permit Yielding**:
-     - Evaluates tool request against `PolicyEngine`.
-     - If `PolicyOutcome::Ask`:
-       - **Drops Concurrency Permit**: `drop(current_permit.take())` so other scheduled agents can use the execution thread while waiting for human sign-off.
-       - Emits `ApprovalRequested` and enters an asynchronous await loop.
-       - Upon receiving `ApprovalResolved`, re-acquires a slot: `current_permit = Some(app_state.scheduler.acquire_permit().await?)`.
-     - If `PolicyOutcome::Allow`: executes tool via `executor.execute_tool(&tool_request)`.
-   - **Self-Healing Error Routing**:
-     - If tool fails: classifies error via `SelfHealing::handle_error`. If `fallback_to_delegation` is active and the agent is a sub-agent, automatically posts an `Escalation` message into its parent's inbox!
-   - **Step Completion & Event Sourcing**:
-     - Emits `DomainEvent::ToolExecuted` and `DomainEvent::ExecutionStepCompleted`.
-   - **Termination Criteria**:
-     Execution completes when:
-     1. Agent emits a thought without tool call or explicit `"Finished"` intent.
-     2. `complete_task` tool executes successfully.
-     3. Execution reaches step 25.
-     4. Consecutive identical errors (`repeated_error`) or identical tool calls (`repeated_action`) trigger anti-loop circuit breakers.
-   - **Worktree Cleanup**:
-     - If running in an isolated git worktree branch (`agent/{agent_id}`), merges changes back to main and prunes worktree directory.
+### Execution Loop Mechanics
+
+1. **Permit Ownership & Initialization**:
+   The runner receives `_permit: OwnedSemaphorePermit` to claim a scheduling slot, wrapped in `mut current_permit = Some(_permit)`. It emits and commits `DomainEvent::ExecutionStarted { execution_id, agent_instance_id }` via CQRS (`crate::cqrs::commit_event`), updating `agent_executions SET status = 'Running'` and broadcasting the change to both project and global event buses.
+
+2. **Step Iteration (Capped at 25 Steps)**:
+   - Cancellation: the loop checks `cancellation_token.is_cancelled()` at the start of each iteration.
+   - Inbox claiming: claims the oldest queued message via `AgentInbox::claim_next(conn, agent_id)` inside a write transaction:
+     ```sql
+     SELECT * FROM inbox_messages
+     WHERE recipient_agent_id = ?1 AND delivery_state = 'QUEUED'
+     ORDER BY created_at ASC LIMIT 1
+     ```
+     It emits `DomainEvent::InboxMessageClaimed`, extracts the payload, formats the prompt as `"User Instruction from {sender}: {content}"`, and acknowledges receipt via `AgentInbox::ack_message` (`DomainEvent::InboxMessageAcked`).
+   - Durable checkpointing: `CheckpointManager::save_checkpoint` writes the current generation, `ExecutionPhase::LlmGeneration`, `last_event_sequence`, and the full context snapshot `serde_json::to_value(&state)` to `execution_checkpoints`.
+   - Context compaction: `ContextCompactor::compact_if_needed` checks if token usage exceeds the trigger threshold (e.g. 75% of context window). If so, it summarizes older steps to keep context within limits.
+   - Memory recall: synthesizes a search query from the system prompt and the last three thoughts, generates embeddings with `provider.embed(&query_text, &model_config)`, and queries `MemoryEngine` for the top 5 learned constraint rules and top 10 relevant episodic memories.
+   - Tool manifest assembly: formats registered tools from `ToolExecutor` into JSON Schema declarations, appending grammar constraints for providers that support structured outputs.
+   - Context prompt construction: `ContextEngine::assemble_prompt_with_context` combines the system prompt, memories, rules, loaded skills, runtime status, and conversation history into `Vec<LlmMessage>`.
+   - Cost Guard check: queries `cost_repo::get_daily_cost` and `get_monthly_cost` to enforce hard budget ceilings before dispatching the request.
+   - Streaming LLM generation: `provider.generate_stream(&request)` streams token chunks to the UI via `DomainEvent::TextDelta` while accumulating `ToolCallDelta` fragments. On provider error, the self-healing retry loop engages. Token metrics are recorded in `token_usage` and `cost_entries`.
+   - Policy evaluation and permit yielding: the tool call is evaluated by `PolicyEngine`. If the policy returns `PolicyOutcome::Ask`, the agent drops its permit via `drop(current_permit.take())` so other agents can make progress while awaiting human review. It emits `ApprovalRequested` and pauses. Once the operator resolves the approval (`ApprovalResolved`), it re-acquires a permit: `current_permit = Some(app_state.scheduler.acquire_permit().await?)`. If the policy is `PolicyOutcome::Allow`, it executes the tool via `executor.execute_tool(&tool_request)`.
+   - Self-healing and error routing: tool failures are classified by `SelfHealing::handle_error`. If the failing agent is a delegated child with `fallback_to_delegation` enabled, it escalates the failure to the parent agent's inbox.
+   - Step completion: emits `DomainEvent::ToolExecuted` and `DomainEvent::ExecutionStepCompleted`.
+   - Termination: the loop terminates if the agent emits a thought without tool calls, if `complete_task` succeeds, if the 25-step cap is reached, or if consecutive identical errors or tool calls trigger the loop circuit breaker.
+   - Worktree cleanup: if running in an isolated worktree branch (`agent/{agent_id}`), changes are committed and merged into main, followed by worktree directory cleanup.
 
 ---
 
@@ -205,10 +175,10 @@ sequenceDiagram
 Trans4mers implements three distinct multi-agent coordination topologies:
 
 ### 1. Supervisor-Worker Pattern (`run_supervisor`)
-1. **Goal Decomposition**: Supervisor prompts LLM to break down a macro objective into $N$ distinct sequential milestones.
-2. **Worker Dispatch**: Iterates through milestones, assigning each milestone to an instantiated worker agent via `spawn_worker_execution`.
-3. **Execution Polling**: Awaits resolution across all worker execution IDs in SQLite with a 200ms poll interval up to 60s timeout.
-4. **Synthesis**: Collates milestone outputs into a comprehensive Markdown report.
+1. The supervisor prompts the model to break down a macro objective into $N$ sequential milestones.
+2. It iterates through the milestones, assigning each to an instantiated worker agent via `spawn_worker_execution`.
+3. It polls SQLite for completion across worker execution IDs every 200ms with a 60-second timeout.
+4. It compiles individual worker outputs into a final consolidated report.
 
 ### 2. Adversarial Debate Pattern (`run_debate`)
 Used for critical architectural reviews, code audits, and strategic validation:

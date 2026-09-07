@@ -1,112 +1,103 @@
-# Trans4mers: Sovereign Autonomous Multi-Agent Desktop Operating System
-## Product Requirements Document (PRD)
+# Trans4mers Product Requirements Document
+
+## 1. Overview
+
+Trans4mers is a desktop application for running local, multi-agent AI workflows on developer workstations. It replaces hosted cloud agent services with a local runtime built on Tauri v2 and Rust, backed by local Ollama models and an embedded SQLite database.
+
+Key product components:
+- Tauri v2 application wrapper hosting a multi-threaded Rust engine and a React 18 frontend.
+- Local model execution through Ollama daemons, with optional API keys for cloud providers stored in the OS credential manager.
+- Event-sourced persistence using SQLite in WAL mode with synchronous writes.
+- Action approval gates with unified diff inspection, argument hashing, and isolated git worktrees.
+- Integrated desktop interface providing team chat, a code editor, terminal, browser mirror, swarm visualizer, memory browser, and MCP protocol inspector.
+- Offline by default with zero network egress unless explicitly configured.
 
 ---
 
-## 1. Executive Summary
+## 2. Goals and Design Principles
 
-**Trans4mers** is a sovereign, local-first, zero-marginal-cost multi-agent desktop operating system designed for software engineers, security professionals, and researchers. It replaces centralized cloud agent frameworks with a fully autonomous desktop application running on local hardware:
-
-- **Desktop Substrate**: Tauri v2 application hosting a multi-threaded Rust engine (`trans4mers-engine`) and a reactive React 18 / TypeScript frontend.
-- **Local-First Model Execution**: Native integration with local Ollama daemons (e.g. `qwen2.5-coder:32b`, `deepseek-r1:32b`, `llama3.3:70b`) with Bring-Your-Own-Key (BYOK) support for frontier cloud models (Claude 3.7, GPT-4.5/o3-mini, Gemini 2.0 Pro) secured via OS Keyring vaulting.
-- **Durable Event-Sourced Storage**: Pure CQRS/event-sourcing with SQLite in WAL mode, ensuring zero data loss across abrupt power termination.
-- **Zero-Trust Governance**: 3D capability lattice, per-hunk unified diff review, anti-TOCTOU canonical argument hashing, and isolated git worktrees.
-- **Comprehensive Workspace Shell**: Integrated 3-column desktop environment featuring Team Chat, Monaco Code Editor, interactive PTY Terminal (`portable-pty`), Chrome DevTools Protocol (CDP) Browser Live Mirror, Visual Swarm Designer, Fleet Dashboard, 4-Tier Memory Inspector, Document RAG, and MCP Protocol Inspector.
-- **Zero Telemetry & Zero Egress by Default**: Trans4mers does not phone home, does not require an account, does not auto-download unauthorized assets, and can operate entirely severed from the public internet.
+1. Private by default: Source code, conversation logs, and cognitive memory stay on local disk. Network calls only happen when an operator configures an external provider, connects a remote MCP server, or starts a browser task.
+2. Crash recovery: The engine writes every agent step and tool invocation to an append-only event log before mutating database tables. If the app closes abruptly, it reconstructs in-flight work on startup.
+3. Operator oversight: Autonomous agents can make mistakes. Operations that touch disk outside temporary folders, execute terminal commands, or alter memory rules pause for human approval.
+4. Independent execution: Tasks run locally without ongoing per-token subscription costs when using open-weight models.
 
 ---
 
-## 2. Product Vision & Sovereign Computing Principles
+## 3. Users and Workflows
 
-### 2.1 The Sovereign Agent Thesis
-Cloud-based AI developer tools suffer from structural limitations: high ongoing operational expenses, data exfiltration risks, vendor lock-in, and unpredictable API latency. Trans4mers establishes a new standard for sovereign computing:
+### Personas
+- Software engineers who want automated coding assistance, multi-file refactors, and test runs without sending proprietary code to third-party servers.
+- Security auditors who need reproducible local agent runs with strict permission boundaries, secret scanning, and full audit logs.
+- Researchers analyzing local documents, searching technical literature, and running multi-perspective debate swarms.
 
-1. **Zero Marginal Cost Execution**: Running billions of tokens across local multi-agent swarms incurs zero recurring fees.
-2. **Absolute Data Privacy**: Codebases, execution traces, cognitive memories, and agent debates remain strictly contained within local workstation SQLite databases and git repositories.
-3. **Provable Durability**: State transitions occur through an append-only event ledger. Every agent step, tool call, and observation is committed inside a transactional write boundary before side-effects occur.
-4. **Zero-Trust Human Oversight**: Agents are treated as untrusted actors. Destructive operations (file writes outside scratch, terminal commands, remote git pushes, memory mutations, credential reads) are intercepted by the `PolicyEngine` and require explicit human sign-off.
-
----
-
-## 3. Target User Personas & Core Use Cases
-
-### 3.1 User Personas
-- **The Sovereign Systems Engineer**: Demands full offline autonomy to build, test, and refactor code without exposing enterprise intellectual property to third-party cloud servers.
-- **The Security & Compliance Officer**: Requires complete auditability, explicit capability gating, secret scanning, and cryptographic anti-tamper assurances.
-- **The Autonomous AI Researcher**: Leverages multi-agent debates, deep research iterative web crawling, and 4-tier cognitive memory to synthesize large volumes of technical data.
-
-### 3.2 Core Use Cases
-- **UC-1: Multi-Agent Feature Implementation**: Supervisor agents decompose macro engineering goals into sequential milestones, dispatching worker agents into isolated git worktrees (`agent/{sub_agent_id}`) to implement, test, and merge code.
-- **UC-2: Adversarial Multi-Agent Debate**: Proponent and Adversarial Critic agents conduct multi-turn formal debates on architecture and security, synthesizing vetted consensus through an Executive Judge agent.
-- **UC-3: Zero-Trust Code Refactoring with Diff Review**: An agent proposes code refactors; the operator inspects changes line-by-line in a side-by-side Monaco diff viewer, accepting or rejecting individual hunks.
-- **UC-4: Continuous Heuristic Learning ("Teach Rule")**: When an operator rejects an agent action, the operator's feedback is distilled into a permanent constraint stored in procedural memory and injected into all future agent contexts.
-- **UC-5: Deep Workspace Document RAG**: Querying thousands of workspace code files and markdown documents using hybrid retrieval (SQLite FTS5 BM25 + dense vector KNN) fused via Reciprocal Rank Fusion ($k=60$).
-- **UC-6: Sovereign Web Automation & Live Mirroring**: Autonomous web interaction through isolated Chrome DevTools Protocol (CDP) spaces with real-time viewport streaming to the desktop UI.
+### Workflows
+- Multi-agent feature development: A supervisor agent breaks down a technical goal into milestones, launches worker agents in isolated git worktrees (`agent/{sub_agent_id}`), and requests review before merging code.
+- Adversarial debate: Two agents run a structured multi-round debate on an architectural choice, followed by an executive agent summarizing actionable conclusions.
+- Refactoring with diff review: An agent drafts file changes, and the operator reviews the proposed diff hunk-by-hunk in a side-by-side Monaco editor before accepting.
+- Rule distillation: When an operator rejects an action with feedback, the system saves the correction as a learned constraint in procedural memory and injects it into future prompts.
+- Codebase RAG: Developers search code repositories using a combination of BM25 full-text queries and dense vector similarity.
+- Browser automation: Agents interact with web applications in sandboxed Chromium profiles while streaming viewport updates to the user interface.
 
 ---
 
-## 4. Product Surface & Functional Specification
+## 4. Functional Specifications
 
-### 4.1 Workspace Shell & Navigation Architecture
-The Trans4mers desktop interface is organized as a 3-column resizable layout:
-- **Left Column**: Team Sidebar with conversation channels (`#general`) and direct-message agent avatars, or the Workspace File Explorer.
-- **Center Column**: Multi-Tab Workspace hosting:
-  - **Chat (`activeTab: 'chat'`)**: Channel stream with markdown formatting, code syntax highlighting, `@mention` agent dispatching, and `/schedule` cron automation.
-  - **Code Editor (`activeTab: 'code'`)**: Embedded Monaco Editor with file tree navigation and immediate save synchronization.
-  - **Swarm Map (`activeTab: 'swarm'`)**: Interactive ReactFlow canvas with Dagre auto-layout visualizing agent relationships, delegation trees, and live execution states.
-  - **Fleet Dashboard (`activeTab: 'fleet'`)**: Live supervisory grid displaying active agent instances, step counters, token velocity, and immediate execution kill switches.
-  - **Deep Research (`activeTab: 'research'`)**: Autonomous multi-query web research dashboard with iterative question decomposition and markdown report generation.
-  - **Browser Live Mirror (`activeTab: 'browser'`)**: Dedicated viewport rendering isolated CDP browser sessions with point-in-time snapshot rollback controls.
-  - **Memory Inspector (`activeTab: 'memory'`)**: Cognitive pyramid browser displaying Working, Episodic, Semantic, and Procedural memory tiers with bi-temporal validity tracking.
-  - **Document RAG (`activeTab: 'docs'`)**: Workspace indexing panel showing chunk counts, SHA-256 file hashes, and hybrid search testing.
-  - **Interactive Artifacts (`activeTab: 'artifacts'`)**: Review pane for generated plans, architecture diagrams, and briefs, featuring line-level comments that dispatch follow-up tasks to agent inboxes.
-- **Right Column**: Live Inspector displaying selected agent profiles, capability matrices, and ReAct step execution logs, paired with the embedded PTY Terminal (`xterm.js`).
+### Desktop Layout
+The application uses a 3-column resizable layout:
+- Left panel: Team sidebar with channels (`#general`), direct message agent avatars, and a file explorer.
+- Center panel: Multi-tab workspace housing:
+  - Chat: Channel feed supporting markdown formatting, `@mention` agent dispatches, and `/schedule` cron triggers.
+  - Code: Monaco editor with file tree navigation and keyboard save shortcuts.
+  - Swarm Map: ReactFlow canvas showing active agent relationships, delegation links, and execution status.
+  - Fleet Dashboard: Grid view of all active agents with step counters, token metrics, and cancel buttons.
+  - Deep Research: Multi-stage research view that breaks questions into search facets, indexes sources, and outputs cited summaries.
+  - Browser Mirror: Viewport rendering sandboxed Chromium sessions with controls to roll back to earlier snapshots.
+  - Memory Inspector: Browser for the 4-tier memory pyramid showing retention levels and temporal validity ranges.
+  - Document RAG: Indexing panel reporting chunk counts, file hashes, and hybrid search results.
+  - Artifacts: Markdown viewer for plans, diagrams, and reports, supporting line-level comments that dispatch tasks back to agents.
+- Right panel: Inspector displaying selected agent details, active ReAct steps, and an embedded terminal (`xterm.js`).
 
-### 4.2 Multi-Agent Runtime & Swarm Topologies
-- **ReAct State Machine**: 25-step execution loop executing thought extraction, dynamic tool manifest assembly, grammar constraints, streaming LLM inference, and self-healing recovery.
-- **Supervisor-Worker Topology**: Hierarchical decomposition where a lead agent provisions worker agents, monitors milestones, and compiles a unified execution report.
-- **Adversarial Debate Topology**: Structured 1-to-10 round debates between Proponent and Critic agents, concluded by an Executive Consensus Judge.
-- **Parallel Fan-Out Topology**: High-throughput distributed task execution distributing batches across worker pools under concurrency caps.
-- **Git Worktree Isolation**: Sub-agents execute within dedicated git worktrees (`.trans4mers/worktrees/{agent_id}`), merging changes back to the main branch upon task completion.
+### Multi-Agent Runtime
+- The ReAct loop runs up to 25 steps per execution, handling message claiming, context compaction, hybrid memory retrieval, streaming generation, and tool execution.
+- Model resolution checks six levels: agent instance override, conversation override, definition default, project setting, app config, and local Ollama auto-detection.
+- Supervisor-worker swarms decompose goals into milestones and track progress against deadlines.
+- Adversarial debates alternate between proponent and critic prompts for 1 to 10 rounds before reaching a consensus judgment.
+- Fan-out swarms distribute independent subtasks across a pool of pre-allocated workers.
+- Child agents run inside dedicated git worktrees located at `.trans4mers/worktrees/{agent_id}`.
 
-### 4.3 4-Tier Cognitive Memory & Hybrid RAG
-- **Working Memory**: Real-time scratchpad holding transient observations.
-- **Episodic Memory**: Checkpointed task execution logs and tool results.
-- **Semantic Memory**: Distilled facts and domain knowledge indexed with dense embeddings.
-- **Procedural Memory**: Permanent operational heuristics and learned constraint rules.
-- **Hybrid Retrieval**: Parallel execution of SQLite FTS5 BM25 search and dense vector KNN (via `sqlite-vec` or `LanceDB`), merged using Reciprocal Rank Fusion ($k=60$).
-- **Background Consolidation**: Hourly evaluation triggering Nightly Dreaming at 3:00 AM with credit protection guards, alongside 60-second conversation distillation sweeps.
+### Memory and Retrieval
+- Four tiers categorize memory by permanence: working memory for in-flight context, episodic memory for task logs, semantic memory for distilled facts, and procedural memory for permanent constraints.
+- Hybrid search runs SQLite FTS5 BM25 queries alongside dense vector similarity, combining results with Reciprocal Rank Fusion ($k = 60$).
+- Background jobs run a 60-second distillation sweep over inactive conversations and an optional 3:00 AM dreaming worker with local-model credit safeguards.
 
-### 4.4 Zero-Trust Governance & Security Trust Layer
-- **3D Capability Lattice**: Strict classification of every tool by `EffectClass` (`ReadOnly`, `IdempotentMutation`, `NonIdempotentMutation`, `Unknown`), `RiskLevel` (`Safe`, `Low`, `Medium`, `High`, `Critical`), and fine-grained `Capability`.
-- **4-Layer Policy Precedence**: Absolute DENY-wins evaluation across Agent, Project, and Global scopes.
-- **DiffReviewer Trust Layer**: Longest Common Subsequence (LCS) dynamic programming generating unified diff hunks, coupled with mandatory secret scanning.
-- **Anti-TOCTOU Canonical Argument Hashing**: SHA-256 digests over key-sorted canonical JSON arguments verified before tool dispatch.
-- **Advisory File Lease Locks**: SQLite-backed 60-second TTL leases preventing concurrent file clobbering.
+### Security and Governance
+- Every tool declares an effect class (`ReadOnly`, `IdempotentMutation`, `NonIdempotentMutation`, `Unknown`), a risk level (`Safe`, `Low`, `Medium`, `High`, `Critical`), and required capabilities.
+- Policies follow a deny-wins rule across global, project, and agent scopes. If any layer denies, the request is blocked.
+- DiffReviewer generates unified diffs using longest common subsequence dynamic programming and scans for sensitive patterns (passwords, private keys, API tokens).
+- Argument hashing serializes tool arguments into sorted canonical JSON and checks a SHA-256 digest before running approved actions.
+- Advisory file locks prevent agents from making conflicting edits to the same file.
 
-### 4.5 External Protocols & Hardware Tools
-- **25 Native Built-in Tools**: Comprehensive primitives spanning filesystem I/O, git manipulation, terminal execution, CDP browser interaction, cognitive memory, MCP invocation, and dynamic delegation.
-- **Model Context Protocol (MCP)**: Sovereign host supporting Stdio child processes and Streamable HTTP (SSE) remote servers, complete with live JSON-RPC frame logging and official MCP Inspector integration.
-- **Native PTY Terminal**: High-performance pseudo-terminal sessions powered by `portable-pty` spawning native shells (`powershell.exe` on Windows, `bash` on Unix) streamed directly to `@xterm/xterm`.
-- **Offline Model Guidance Catalog**: Zero-egress static directory profiling 22 model families with size classes, context limits, and tool-calling capabilities.
+### Protocols and External Tools
+- Includes 25 built-in native tools covering file I/O, git commands, terminal interaction, browser tasks, memory queries, and sub-agent delegation.
+- The Model Context Protocol client handles child processes over stdio and remote servers over SSE, logging all traffic frames to SQLite.
+- Interactive terminal sessions spawn real shell processes (`powershell.exe` on Windows, `bash` on Unix) through `portable-pty`.
+- An offline guidance catalog includes context limits, parameter sizes, and capability flags for 22 model families without making web requests.
 
 ---
 
-## 5. Non-Functional Requirements & Operating Constraints
+## 5. Non-Functional Requirements
 
-| Requirement | Metric / Specification | Verification Target |
-| :--- | :--- | :--- |
-| **Cold Start Latency** | $< 1.5\text{ s}$ from executable launch to interactive UI | Verified on standard workstation SSD |
-| **Event Append Latency** | $< 5\text{ ms}$ per committed CQRS event envelope | Synchronous SQLite WAL write transaction |
-| **Default Network Egress** | Exactly $0$ bytes outbound | Loopback-only enforcement (`127.0.0.1`) |
-| **Process Hygiene** | Zero orphaned background processes on exit | Guaranteed cleanup of Chromium and PTY processes |
-| **Code Quality** | Zero compiler warnings under `-D warnings` | 100% compliant across all workspace crates |
+- Cold start to an interactive desktop window takes under 1.5 seconds on solid-state storage.
+- Synchronous SQLite WAL transactions commit in under 5 milliseconds.
+- Zero outbound network traffic when operating in local mode.
+- Child processes (Chromium and PTY sessions) terminate cleanly when browser spaces close or the application exits.
+- Rust codebase compiles cleanly under `-D warnings`.
 
 ---
 
-## 6. Known Limitations & Technical Boundaries
+## 6. Known Constraints and Operational Limits
 
-1. **Local Parameter Ceilings**: Small local models (3B to 8B parameters) exhibit reasoning degradation on long-horizon engineering tasks. Trans4mers utilizes ReAct step bounding, self-healing classification, and human-in-the-loop diff review to catch deviations.
-2. **Embedding Model Prerequisite**: Semantic RAG and vector memory require an active local embedding model (e.g. `nomic-embed-text` via Ollama). In its absence, the engine degrades gracefully to SQLite FTS5 lexical matching.
-3. **Single-Operator Architecture**: Designed for single-operator workstations without multi-tenant cloud authentication or multi-user document synchronization.
-4. **External Binary Prerequisites**: Browser automation requires local installation of Google Chrome or Chromium; MCP Inspector requires local Node.js and npx binaries.
+1. Model reasoning limits: Small models (3B to 8B parameters) can struggle on multi-step architectural refactors. The runtime uses step limits, self-healing retries, and manual diff approvals to catch missteps.
+2. Embedding requirement: Full semantic vector search requires an active embedding model (such as `nomic-embed-text` in Ollama). When none is present, retrieval falls back to lexical FTS5 BM25 search.
+3. Single workstation design: Trans4mers runs as a local single-user desktop program. It does not provide multi-tenant user accounts or real-time cloud document sync.
+4. Binary prerequisites: Browser spaces require a local Google Chrome or Chromium executable. The MCP Inspector requires Node.js and npx installed on the host.

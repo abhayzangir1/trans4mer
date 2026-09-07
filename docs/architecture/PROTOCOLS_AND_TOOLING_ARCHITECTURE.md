@@ -1,6 +1,6 @@
 # External Protocols, Inference & Native Tooling Architecture
 
-This document provides a line-by-line, physically reverse-engineered architectural specification of the external integration layer in Trans4mers. It details how the engine interfaces with Large Language Model inference providers, the Model Context Protocol (MCP), Chrome DevTools Protocol (CDP) browser spaces, native pseudo-terminals (PTY), and built-in execution tools.
+This document details the external integration layer in Trans4mers: LLM provider streaming and tool mapping, the Model Context Protocol (MCP) host, Chrome DevTools Protocol (CDP) browser spaces, native pseudo-terminals (PTY), and built-in execution tools.
 
 ---
 
@@ -60,26 +60,15 @@ flowchart TD
     StreamConsumer --> TokenAcc
 ```
 
-### Provider Implementation Realities & Limitations
+### Provider Implementations & Notes
 
-Based on direct source code inspection of `core/trans4mers-providers/src/llm/`:
+1. [`OllamaProvider`](../../core/trans4mers-providers/src/llm/ollama.rs) streams newline-delimited JSON (`NDJSON`) from `POST /api/chat`. It unpacks `message.tool_calls` and emits `LlmStreamEvent::ToolCallDelta`. When tools are provided, Ollama does not accept a strict JSON schema alongside them; tool definitions are passed in the `tools` array. For zero-egress environments, `OllamaModelDetector` reads local manifests directly from `~/.ollama/models/manifests` without network requests, and rejects non-loopback IPs.
 
-1. **[`OllamaProvider`](../../core/trans4mers-providers/src/llm/ollama.rs)**:
-   - **Streaming Protocol**: Consumes newline-delimited JSON (`NDJSON`) chunks from `POST /api/chat`.
-   - **Tool Calls**: Unpacks `message.tool_calls` natively. Emits `LlmStreamEvent::ToolCallDelta` when JSON chunk contains partial or complete tool call definitions.
-   - **Grammar Support**: When tools are provided, Ollama format parameter cannot be set to a strict JSON schema if tools are invoked natively; tool definitions are supplied via the `tools` array.
-   - **Zero-Egress Security & Auto-Detection**: Includes `OllamaModelDetector` which reads local model manifests directly from disk at `~/.ollama/models/manifests` without making network calls. Hard-enforces loopback endpoints (`127.0.0.1` or `localhost`), rejecting remote IPs.
+2. [`AnthropicProvider`](../../core/trans4mers-providers/src/llm/anthropic.rs) uses Server-Sent Events (`text/event-stream`), unpacking `content_block_delta` for text and `message_delta` for token usage. In `anthropic.rs`, streaming does not assemble partial tool-call deltas. When tools are invoked, the provider switches to non-streaming `generate()` to deserialize complete tool-call blocks.
 
-2. **[`AnthropicProvider`](../../core/trans4mers-providers/src/llm/anthropic.rs)**:
-   - **Streaming Protocol**: Server-Sent Events (`text/event-stream`). Unpacks `content_block_delta` for `text_delta` and `message_delta` for output token usage.
-   - **Audited Limitation**: In `anthropic.rs`, streaming does **not** support partial tool-call delta assembly. When tools are enabled and required, the provider relies on non-streaming generation (`generate()`) to ensure complete tool-call block deserialization.
+3. [`OpenAiProvider`](../../core/trans4mers-providers/src/llm/openai.rs) streams SSE events terminating with `data: [DONE]`. It accumulates indexed tool call chunks across argument fragments until complete.
 
-3. **[`OpenAiProvider`](../../core/trans4mers-providers/src/llm/openai.rs)**:
-   - **Streaming Protocol**: SSE chunks with `data: {...}` lines terminating with `data: [DONE]`.
-   - **Tool Calls**: Progressively accumulates indexed tool call chunks (`choices[0].delta.tool_calls[i]`) across argument fragments until completion.
-
-4. **[`GoogleProvider`](../../core/trans4mers-providers/src/llm/google.rs)**:
-   - **Audited Limitation**: Does **not** implement native SSE streaming (`streamGenerateContent`). It inherits the default trait implementation, awaiting full synchronous `generate()` completion and then emitting synthetic chunks. Function declarations map via `functionDeclarations` inside `tools`.
+4. [`GoogleProvider`](../../core/trans4mers-providers/src/llm/google.rs) does not implement native SSE streaming (`streamGenerateContent`). It uses the trait fallback, awaiting the complete `generate()` response and emitting synthetic chunks. Tool definitions are passed via `functionDeclarations`.
 
 ---
 
