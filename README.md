@@ -91,27 +91,37 @@ Every state transition writes to an append-only event log before updating databa
 
 ## Quick Start & One-Click Install
 
-### 1. Download Native Installer
+### 1. Launch with Helper Script (Windows)
 
-Download the pre-compiled installer for your operating system from [**GitHub Releases**](https://github.com/abhayzangir1/trans4mer/releases/latest):
-
-| Platform | Installer Package | Distribution Type |
-| :--- | :--- | :--- |
-| **Windows** | Trans4mers_0.1.0_x64-setup.exe | One-Click NSIS Installer (No admin UAC needed) |
-| **macOS** | Trans4mers_0.1.0_universal.dmg | Native DMG (Apple Silicon & Intel Universal) |
-| **Linux** | Trans4mers_0.1.0_amd64.AppImage / .deb | Portable AppImage & Debian Package |
-
----
-
-### 2. Launch with Helper Script (Windows)
-
-If you cloned the source code, run the startup script:
+Clone the repository and run the automated startup script:
 
 ```bat
+git clone https://github.com/abhayzangir1/trans4mer.git
+cd trans4mer
 .\run-app.bat
 ```
 
-The script checks if an Ollama daemon is active, launches it if missing, checks the local Vite dev server on port 1420, and starts the desktop shell.
+The script checks if an Ollama daemon is active, starts the local Vite dev server on port 1420, and boots the native Tauri desktop shell.
+
+---
+
+### 2. Manual Development & Build
+
+Alternatively, run or package the desktop application manually using Cargo and npm:
+
+```bash
+# 1. Install frontend dependencies
+cd apps/desktop
+npm install
+
+# 2. Run in development mode (hot reloading)
+cargo tauri dev
+
+# 3. Build standalone native installer (NSIS on Windows, DMG on macOS, AppImage on Linux)
+cargo tauri build
+```
+
+> **Note on CI Releases:** Pre-compiled binaries are generated via the automated GitHub Actions workflow (`.github/workflows/release.yml`) whenever a release tag (e.g., `v0.1.0`) is pushed to GitHub.
 
 ---
 
