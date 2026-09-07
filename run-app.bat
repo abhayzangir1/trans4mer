@@ -3,6 +3,16 @@ echo =======================================================
 echo          Starting Trans4mers Sovereign Agent OS
 echo =======================================================
 
+:: Auto-detect PROTOC if present in WinGet packages
+if not defined PROTOC (
+    for /d %%P in ("%LOCALAPPDATA%\Microsoft\WinGet\Packages\Google.Protobuf*") do (
+        if exist "%%P\bin\protoc.exe" (
+            set "PROTOC=%%P\bin\protoc.exe"
+            set "PATH=%%P\bin;%PATH%"
+        )
+    )
+)
+
 :: 1. Check Ollama
 echo [1/3] Checking Ollama daemon on http://127.0.0.1:11434...
 curl.exe -s http://127.0.0.1:11434/api/tags >nul 2>&1
