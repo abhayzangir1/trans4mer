@@ -1,6 +1,6 @@
 # Architecture Decisions
 
-This document explains the WHY behind the non-obvious engineering choices. The full decision table (52 locked decisions) lives in the implementation plan; this file records the deviations and gap-fills discovered while building, with reasons.
+This document explains the WHY behind the non-obvious engineering choices. For the full multi-subsystem architecture blueprints and diagrams, see [**System Architecture Reference (docs/ARCHITECTURE.md)**](ARCHITECTURE.md).
 
 ## Locked decisions (recap)
 

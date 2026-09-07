@@ -98,6 +98,8 @@ Trans4mers is strictly **model-agnostic**. It automatically discovers models in 
 
 ## Architecture
 
+> 📖 **Deep-Dive Engineering Specification:** For full architectural blueprints across all 8 subsystems (Crate Topology, Event-Sourced CQRS, Runtime Loop, Swarm Topologies, 4-Tier Memory Pyramid, Zero-Trust Policy Engine, PTY/CDP/MCP Subsystems, and Desktop Shell), read the [**Trans4mers System Architecture Reference (docs/ARCHITECTURE.md)**](docs/ARCHITECTURE.md).
+
 ```mermaid
 flowchart TB
     subgraph UI ["Desktop Shell (Tauri 2 + React + TypeScript)"]
@@ -291,6 +293,7 @@ cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p t
 
 ## Documentation
 
+- [System Architecture Reference (docs/ARCHITECTURE.md)](docs/ARCHITECTURE.md) — Comprehensive technical blueprints of all 8 core subsystems.
 - [Architecture Decisions (docs/ARCHITECTURE_DECISIONS.md)](docs/ARCHITECTURE_DECISIONS.md) — Rationale for event sourcing, concurrency caps, and zero-trust gating.
 - [Agent Tutorial (docs/AGENT_TUTORIAL.md)](docs/AGENT_TUTORIAL.md) — Guide to authoring and deploying custom agent archetypes.
 - [Plugin Development (docs/PLUGIN_DEVELOPMENT.md)](docs/PLUGIN_DEVELOPMENT.md) — How to write external tools via JSON-RPC.
