@@ -293,7 +293,14 @@ cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p t
 
 ## Documentation
 
-- [System Architecture Reference (docs/ARCHITECTURE.md)](docs/ARCHITECTURE.md) — Comprehensive technical blueprints of all 8 core subsystems.
+- [Product Requirements Document (PRD.md)](PRD.md) — Reverse-engineered product capabilities, personas, workflows, and constraints.
+- [Technical Requirements Document (TRD.md)](TRD.md) — Full technical specification, schemas, algorithms, IPC modules, and security invariants.
+- [System Architecture Reference (docs/ARCHITECTURE.md)](docs/ARCHITECTURE.md) — Master technical blueprint and dependency graph.
+  - [Memory & Cognitive RAG Architecture (docs/architecture/MEMORY_AND_RAG_ARCHITECTURE.md)](docs/architecture/MEMORY_AND_RAG_ARCHITECTURE.md)
+  - [Agent Runtime & Swarm Architecture (docs/architecture/AGENT_AND_SWARM_ARCHITECTURE.md)](docs/architecture/AGENT_AND_SWARM_ARCHITECTURE.md)
+  - [Zero-Trust Governance & Security Architecture (docs/architecture/GOVERNANCE_AND_SECURITY_ARCHITECTURE.md)](docs/architecture/GOVERNANCE_AND_SECURITY_ARCHITECTURE.md)
+  - [External Protocols & Native Tooling Architecture (docs/architecture/PROTOCOLS_AND_TOOLING_ARCHITECTURE.md)](docs/architecture/PROTOCOLS_AND_TOOLING_ARCHITECTURE.md)
+  - [Desktop Shell & Tauri IPC Bridge Architecture (docs/architecture/FRONTEND_AND_IPC_ARCHITECTURE.md)](docs/architecture/FRONTEND_AND_IPC_ARCHITECTURE.md)
 - [Architecture Decisions (docs/ARCHITECTURE_DECISIONS.md)](docs/ARCHITECTURE_DECISIONS.md) — Rationale for event sourcing, concurrency caps, and zero-trust gating.
 - [Agent Tutorial (docs/AGENT_TUTORIAL.md)](docs/AGENT_TUTORIAL.md) — Guide to authoring and deploying custom agent archetypes.
 - [Plugin Development (docs/PLUGIN_DEVELOPMENT.md)](docs/PLUGIN_DEVELOPMENT.md) — How to write external tools via JSON-RPC.
