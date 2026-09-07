@@ -1,0 +1,19 @@
+{
+  "name": "example-plugin",
+  "version": "1.0.0",
+  "description": "An example Trans4mers plugin exposing an echo tool over stdio JSON-RPC",
+  "command": ["python3", "server.py"],
+  "tools": [
+    {
+      "name": "echo",
+      "description": "Echo the provided text back (proves the sandbox end to end)",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string" }
+        },
+        "required": ["text"]
+      }
+    }
+  ]
+}

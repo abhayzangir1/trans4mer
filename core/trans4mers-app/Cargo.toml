@@ -1,0 +1,27 @@
+[package]
+name = "trans4mers-app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+test = false
+
+[dependencies]
+trans4mers-domain = { path = "../trans4mers-domain" }
+trans4mers-storage = { path = "../trans4mers-storage" }
+trans4mers-engine = { path = "../trans4mers-engine" }
+trans4mers-providers = { path = "../trans4mers-providers" }
+tauri = { version = "2.0.0-rc" } 
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+keyring = "3.1.2"
+reqwest = { version = "0.12", features = ["json"] }
+git2 = "0.19"
+rusqlite.workspace = true
+rfd = "0.15"

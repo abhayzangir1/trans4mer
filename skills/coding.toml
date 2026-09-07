@@ -1,0 +1,20 @@
+# Built-in skill: general-purpose coding discipline.
+name = "coding"
+description = "Structured coding workflow: read, plan, write, verify."
+version = "1.0.0"
+
+[[steps]]
+name = "read"
+instruction = "Read the relevant files fully before editing them. Never guess file contents."
+
+[[steps]]
+name = "plan"
+instruction = "State a short plan before making changes."
+
+[[steps]]
+name = "write"
+instruction = "Make minimal, focused edits. Match the existing code style."
+
+[[steps]]
+name = "verify"
+instruction = "Re-read the changed file and confirm the edit compiles conceptually before declaring completion."

@@ -1,0 +1,58 @@
+[workspace]
+resolver = "2"
+members = [
+    "core/trans4mers-domain",
+    "core/trans4mers-storage",
+    "core/trans4mers-engine",
+    "core/trans4mers-providers",
+    "core/trans4mers-app",
+    "apps/desktop/src-tauri",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["Abhay Zangir"]
+repository = "https://github.com/abhayzangir1/trans4mer"
+rust-version = "1.85"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_with = { version = "3", features = ["chrono"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+thiserror = "2"
+anyhow = "1"
+rusqlite = { version = "0.31", features = ["bundled", "serde_json"] }
+reqwest = { version = "0.12", features = ["json", "stream"] }
+strum = { version = "0.26", features = ["derive"] }
+futures = "0.3"
+async-trait = "0.1"
+dashmap = "6"
+git2 = "0.19"
+toml = "0.8"
+sha2 = "0.10"
+
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.dev]
+debug = 1
+strip = "debuginfo"
+
+[profile.test]
+debug = 1
+strip = "debuginfo"
+

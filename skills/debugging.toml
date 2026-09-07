@@ -1,0 +1,20 @@
+# Built-in skill: debugging discipline.
+name = "debugging"
+description = "Root-cause analysis before fixes."
+version = "1.0.0"
+
+[[steps]]
+name = "reproduce"
+instruction = "Establish the failing case before changing anything."
+
+[[steps]]
+name = "isolate"
+instruction = "Narrow the failure to the smallest possible cause."
+
+[[steps]]
+name = "fix"
+instruction = "Fix the cause, not the symptom."
+
+[[steps]]
+name = "confirm"
+instruction = "Verify the original failing case now passes."

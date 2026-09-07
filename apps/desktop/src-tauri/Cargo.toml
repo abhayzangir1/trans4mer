@@ -1,0 +1,26 @@
+[package]
+name = "trans4mers-desktop"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "trans4mers-desktop"
+path = "src/main.rs"
+test = false
+
+[build-dependencies]
+tauri-build = { version = "2.0.0-rc", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0-rc", features = [] }
+tauri-plugin-shell = "2.0.0-rc"
+trans4mers-app = { path = "../../../core/trans4mers-app" }
+trans4mers-domain = { path = "../../../core/trans4mers-domain" }
+trans4mers-storage = { path = "../../../core/trans4mers-storage" }
+trans4mers-engine = { path = "../../../core/trans4mers-engine" }
+trans4mers-providers = { path = "../../../core/trans4mers-providers" }
+dirs = "5"
+tokio = { version = "1", features = ["full"] }
+tokio-util = { workspace = true }
+tracing = "0.1"
+tracing-subscriber = "0.3"

@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-sm;
+  }
+}
+
+/* XTerm.js overrides */
+.xterm .xterm-viewport {
+  background-color: transparent !important;
+}

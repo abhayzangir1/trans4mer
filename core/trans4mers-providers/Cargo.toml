@@ -1,0 +1,29 @@
+[package]
+name = "trans4mers-providers"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+trans4mers-domain = { path = "../trans4mers-domain" }
+reqwest.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+dashmap.workspace = true
+serde.workspace = true
+chrono.workspace = true
+futures.workspace = true
+chromiumoxide = { version = "0.9.1", default-features = false, features = ["bytes"] }
+which = "8"
+url = "2"
+uuid.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+trans4mers-storage = { path = "../trans4mers-storage" }
+rusqlite.workspace = true
+
+

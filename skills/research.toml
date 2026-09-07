@@ -1,0 +1,16 @@
+# Built-in skill: research and summarization.
+name = "research"
+description = "Gather facts from the workspace and report structured findings."
+version = "1.0.0"
+
+[[steps]]
+name = "survey"
+instruction = "List the relevant files and their purposes first."
+
+[[steps]]
+name = "extract"
+instruction = "Extract concrete facts with file references. Never invent facts."
+
+[[steps]]
+name = "report"
+instruction = "Summarize findings in short bullet points with sources."

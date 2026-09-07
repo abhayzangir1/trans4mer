@@ -1,0 +1,22 @@
+pub mod datetime_util;
+pub mod db_handle;
+pub mod filesystem;
+pub mod fts5;
+pub mod lancedb_store;
+pub mod migration_runner;
+pub mod repos;
+pub mod rrf;
+pub mod vector_blob;
+pub mod vector_migration;
+pub mod vector_store;
+
+pub use datetime_util::{parse_db_datetime, parse_db_datetime_opt};
+pub use db_handle::DbHandle;
+pub use filesystem::FileSystemGuard;
+pub use fts5::{sanitize_fts5_prefix_query, sanitize_fts5_query};
+pub use lancedb_store::LanceDbStore;
+pub use migration_runner::MigrationRunner;
+pub use rrf::reciprocal_rank_fusion;
+pub use vector_blob::{blob_to_embedding, embedding_to_blob};
+pub use vector_migration::{VectorMigrationReport, migrate_vector_backend};
+pub use vector_store::{SqliteVecStore, VectorRecord, VectorSearchResult, VectorStore};

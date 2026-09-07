@@ -1,0 +1,27 @@
+[package]
+name = "trans4mers-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+trans4mers-domain = { path = "../trans4mers-domain" }
+trans4mers-storage = { path = "../trans4mers-storage" }
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+uuid.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+reqwest.workspace = true
+portable-pty = "0.8.1"
+tokio-util = "0.7"
+dashmap.workspace = true
+tiktoken-rs = "0.5.8"
+git2 = "0.19"
+rusqlite.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+toml.workspace = true
+sha2.workspace = true
+futures.workspace = true

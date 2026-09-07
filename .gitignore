@@ -1,0 +1,53 @@
+# Rust
+/target/
+**/target/
+**/*.rs.bk
+*.pdb
+*.exe
+apps/desktop/src-tauri/bin/
+
+# Node & Frontend
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# Tauri
+**/src-tauri/target/
+
+# SQLite & Runtime State
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+*.db-shm
+*.db-wal
+.trans4mers/
+
+# Logs & Temporary Files
+*.log
+scratch/
+tmp/
+temp/
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json

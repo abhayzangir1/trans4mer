@@ -1,0 +1,106 @@
+name: Release Trans4mers Desktop
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v0.1.0)'
+        required: true
+        default: 'v0.1.0'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-and-release:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: 'windows-latest'
+            args: ''
+            target: 'x86_64-pc-windows-msvc'
+          - platform: 'macos-latest'
+            args: '--target universal-apple-darwin'
+            target: 'universal-apple-darwin'
+          - platform: 'ubuntu-22.04'
+            args: ''
+            target: 'x86_64-unknown-linux-gnu'
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: apps/desktop/package-lock.json
+
+      - name: Install Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Rust Cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: './core -> target'
+
+      - name: Install Linux System Dependencies (Ubuntu)
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libxdo-dev \
+            libssl-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
+
+      - name: Install Frontend Dependencies
+        run: |
+          cd apps/desktop
+          npm ci
+
+      - name: Build Frontend Production Assets
+        run: |
+          cd apps/desktop
+          npm run build
+
+      - name: Build and Package Tauri App
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: './apps/desktop'
+          tagName: ${{ github.ref_name || github.event.inputs.version }}
+          releaseName: 'Trans4mers Desktop ${{ github.ref_name || github.event.inputs.version }}'
+          releaseBody: |
+            ## Trans4mers Sovereign Multi-Agent OS
+            
+            ### Native Binaries & Installers
+            - **Windows**: `Trans4mers_${{ github.ref_name }}_x64-setup.exe` (NSIS) or `.msi`
+            - **macOS**: `Trans4mers_${{ github.ref_name }}_universal.dmg` (Apple Silicon & Intel)
+            - **Linux**: `Trans4mers_${{ github.ref_name }}_amd64.AppImage` & `.deb`
+
+            ### Quick Start (Zero-Setup)
+            1. Download and run the installer for your operating system.
+            2. Launch Trans4mers.
+            3. Point to a local Ollama instance (default `http://localhost:11434`) or insert any OpenAI / Anthropic / Gemini BYOK API key.
+            4. Start programming with sovereign agents on your local workspace.
+          releaseDraft: false
+          prerelease: false
+          args: ${{ matrix.args }}
