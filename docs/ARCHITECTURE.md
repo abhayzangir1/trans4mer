@@ -315,7 +315,7 @@ flowchart TB
 
 When searching documents or memories, Trans4mers runs lexical and vector queries concurrently, merging the ranking via **Reciprocal Rank Fusion (RRF)**:
 
-$$\text{RRF\_Score}(d) = \frac{1}{60 + \text{Rank}_{\text{BM25}}(d)} + \frac{1}{60 + \text{Rank}_{\text{Vector}}(d)}$$
+$$\mathrm{RRF}(d) = \frac{1}{60 + \mathrm{Rank}_{\mathrm{BM25}}(d)} + \frac{1}{60 + \mathrm{Rank}_{\mathrm{Vector}}(d)}$$
 
 ```mermaid
 flowchart LR
@@ -365,7 +365,7 @@ sequenceDiagram
 ### SHA-256 Canonical Argument Hashing
 
 To prevent Time-of-Check to Time-of-Use (TOCTOU) attacks, approval records store a canonical hash:
-$$\text{arguments\_hash} = \text{SHA-256}(\text{CanonicalKeySortedJSON}(\text{arguments}))$$
+$$\mathrm{ArgumentsHash} = \mathrm{SHA256}(\mathrm{CanonicalKeySortedJSON}(\mathrm{arguments}))$$
 
 When execution resumes, the runtime verifies that the arguments executing are byte-for-byte identical to the arguments the human operator approved.
 
