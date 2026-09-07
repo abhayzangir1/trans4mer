@@ -11,30 +11,30 @@ Agent execution in Trans4mers is driven by an asynchronous ReAct (Reasoning + Ac
 ```mermaid
 stateDiagram-v2
     [*] --> Scheduled: Scheduler assigns permit
-    Scheduled --> ClaimInbox: run_agent_execution()
-    ClaimInbox --> SaveCheckpoint: Claim oldest queued message & ACK
-    SaveCheckpoint --> CheckCompaction: CheckpointManager::save_checkpoint()
-    CheckCompaction --> RetrieveRAG: ContextCompactor::compact_if_needed()
-    RetrieveRAG --> AssembleContext: Embed query & fetch memories / rules
-    AssembleContext --> CheckBudget: Assemble prompt & tools
-    CheckBudget --> StreamingLLM: CostGuard daily/monthly budget validation
-    StreamingLLM --> ParseAction: Token deltas streamed to UI
-    ParseAction --> PolicyEvaluation: Extract thought & tool call JSON
+    Scheduled --> ClaimInbox: Begin execution
+    ClaimInbox --> SaveCheckpoint: Claim message and ACK
+    SaveCheckpoint --> CheckCompaction: Save checkpoint snapshot
+    CheckCompaction --> RetrieveRAG: Compact context if needed
+    RetrieveRAG --> AssembleContext: Recall memories and rules
+    AssembleContext --> CheckBudget: Assemble prompt and tools
+    CheckBudget --> StreamingLLM: Validate cost budget
+    StreamingLLM --> ParseAction: Stream token deltas to UI
+    ParseAction --> PolicyEvaluation: Extract thought and tool call
     
     state PolicyEvaluation {
         [*] --> CheckPolicy
-        CheckPolicy --> AutoApproved: PolicyOutcome::Allow
-        CheckPolicy --> YieldPermit: PolicyOutcome::Ask
-        YieldPermit --> AwaitResolution: Emit ApprovalRequested & drop permit
-        AwaitResolution --> ReacquirePermit: ApprovalResolved event received
-        ReacquirePermit --> AutoApproved: Scheduler grants new permit
-        CheckPolicy --> Denied: PolicyOutcome::Deny
+        CheckPolicy --> AutoApproved: Policy Allow
+        CheckPolicy --> YieldPermit: Policy Ask
+        YieldPermit --> AwaitResolution: Request approval and drop permit
+        AwaitResolution --> ReacquirePermit: Approval resolved
+        ReacquirePermit --> AutoApproved: Grant new permit
+        CheckPolicy --> Denied: Policy Deny
     }
 
-    AutoApproved --> ExecuteTool: ToolExecutor dispatches tool
-    ExecuteTool --> CommitStep: Commit ToolExecuted & step completed
-    CommitStep --> CheckTermination: Step count, finish action, or complete_task?
-    CheckTermination --> SaveCheckpoint: Next iteration (max 25)
+    AutoApproved --> ExecuteTool: Dispatch tool execution
+    ExecuteTool --> CommitStep: Commit step completion
+    CommitStep --> CheckTermination: Evaluate termination conditions
+    CheckTermination --> SaveCheckpoint: Next iteration up to step 25
     CheckTermination --> CompleteExecution: Terminated
     Denied --> CommitStep: Record policy rejection
     CompleteExecution --> MergeWorktree: Merge agent branch into main
