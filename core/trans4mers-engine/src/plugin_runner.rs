@@ -46,8 +46,14 @@ impl PluginRunner {
             .spawn()
             .map_err(|e| Trans4mersError::Internal(e.to_string()))?;
 
-        let mut stdin = child.stdin.take().unwrap();
-        let stdout = child.stdout.take().unwrap();
+        let mut stdin = child
+            .stdin
+            .take()
+            .ok_or_else(|| Trans4mersError::Internal("Failed to capture plugin stdin".to_string()))?;
+        let stdout = child
+            .stdout
+            .take()
+            .ok_or_else(|| Trans4mersError::Internal("Failed to capture plugin stdout".to_string()))?;
 
         let req = serde_json::json!({
             "jsonrpc": "2.0",
@@ -55,7 +61,8 @@ impl PluginRunner {
             "method": "manifest"
         });
 
-        let req_bytes = serde_json::to_vec(&req).unwrap();
+        let req_bytes = serde_json::to_vec(&req)
+            .map_err(|e| Trans4mersError::Internal(format!("Failed to serialize plugin request: {}", e)))?;
         stdin
             .write_all(&req_bytes)
             .await
@@ -144,8 +151,14 @@ impl Tool for PluginToolWrapper {
                 .spawn()
                 .map_err(|e| Trans4mersError::Internal(e.to_string()))?;
 
-            let mut stdin = child.stdin.take().unwrap();
-            let stdout = child.stdout.take().unwrap();
+            let mut stdin = child
+                .stdin
+                .take()
+                .ok_or_else(|| Trans4mersError::Internal("Failed to capture plugin stdin".to_string()))?;
+            let stdout = child
+                .stdout
+                .take()
+                .ok_or_else(|| Trans4mersError::Internal("Failed to capture plugin stdout".to_string()))?;
 
             let req = serde_json::json!({
                 "jsonrpc": "2.0",
@@ -154,7 +167,8 @@ impl Tool for PluginToolWrapper {
                 "params": request.arguments
             });
 
-            let req_bytes = serde_json::to_vec(&req).unwrap();
+            let req_bytes = serde_json::to_vec(&req)
+                .map_err(|e| Trans4mersError::Internal(format!("Failed to serialize plugin request: {}", e)))?;
             stdin
                 .write_all(&req_bytes)
                 .await

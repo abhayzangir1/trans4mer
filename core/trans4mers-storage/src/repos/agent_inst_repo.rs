@@ -10,10 +10,10 @@ pub fn insert_agent_instance(
 ) -> Result<(), Trans4mersError> {
     let capabilities_json = serde_json::to_string(&agent.capabilities)
         .map_err(|e| Trans4mersError::Database(e.to_string()))?;
-    let model_override_json = agent
-        .model_config_override
-        .as_ref()
-        .map(|m| serde_json::to_string(m).unwrap());
+    let model_override_json = match &agent.model_config_override {
+        Some(m) => Some(serde_json::to_string(m).map_err(|e| Trans4mersError::Database(e.to_string()))?),
+        None => None,
+    };
 
     conn.execute(
         "INSERT INTO agent_instances (

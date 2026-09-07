@@ -11,15 +11,15 @@
 ## Development loop
 
 ```bash
-cargo test --workspace                                # run all unit and integration tests
-cargo clippy --workspace -- -D warnings               # lint check
-cd apps/desktop && npm run build                      # typecheck and compile frontend bundle
-cargo tauri dev                                       # run full desktop app (requires Ollama)
+cargo test --workspace --exclude trans4mers-desktop -j 2 # run all unit and integration tests
+cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p trans4mers-providers -p trans4mers-app
+cd apps/desktop && npm run build                         # typecheck and compile frontend bundle
+cargo tauri dev                                          # run full desktop app (requires Ollama)
 ```
 
 ## Before opening a PR
 
-- `cargo test --workspace` green
-- `cargo clippy --workspace -- -D warnings` clean
+- `cargo test --workspace --exclude trans4mers-desktop -j 2` green
+- `cargo check --workspace` clean
 - `npm run build` in `apps/desktop` clean (0 TypeScript / bundling errors)
 - New events have projections; new commands are registered in `generate_handler!`

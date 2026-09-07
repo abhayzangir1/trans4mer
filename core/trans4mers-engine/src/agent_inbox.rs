@@ -15,7 +15,8 @@ impl AgentInbox {
         sender_actor_id: &str,
         payload: &serde_json::Value,
     ) -> Result<(), Trans4mersError> {
-        let payload_str = serde_json::to_string(payload).unwrap();
+        let payload_str = serde_json::to_string(payload)
+            .map_err(|e| Trans4mersError::Serialization(e.to_string()))?;
         let event = DomainEvent::InboxMessageQueued {
             message_id: message_id.to_string(),
             recipient_agent_id: *recipient_agent_id,

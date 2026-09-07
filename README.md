@@ -37,6 +37,10 @@ Trans4mers is a local desktop application for running autonomous agent swarms on
 
 Every state transition writes to an append-only event log before updating database tables. If the application gets terminated mid-task, the engine reads the log on next startup, replays pending events, and picks up where it stopped. Dangerous actions like writing files outside scratch, executing shell commands, or changing database rules pause for operator review.
 
+> [!WARNING]
+> **Project Status & Security Notice:**  
+> Trans4mers is an early-stage, solo-authored personal research project. While it implements a zero-trust capability lattice and Myers LCS diff review gating, **it has not undergone independent external third-party security audits.** Because this software executes shell commands and writes files directly to your workstation, always inspect proposed agent actions in the Human-in-the-Loop Diff Panel before granting authorization. Run within sandboxed, test, or backed-up environments.
+
 ---
 
 ## Product Screenshots & System Interface <a id="product-screenshots"></a>
@@ -257,9 +261,9 @@ The desktop interface includes four visual themes:
 
 ---
 
-## Benchmarks & Resource Footprint
+## Developer Workstation Measurements (Self-Reported) <a id="benchmarks--footprint"></a>
 
-Measurements taken on developer workstations (Apple M-series, Intel Core i7 / AMD Ryzen 7, 16GB RAM):
+*Note: The following measurements were captured locally by the author on development hardware (Apple M-series, Intel Core i7 / AMD Ryzen 7, 16GB RAM) during local test runs. They represent author-reported observations under standard local testing conditions, not independent third-party verified benchmarks.*
 
 | Metric | Measured Value | Standard Cloud Competitors |
 | :--- | :--- | :--- |
@@ -360,7 +364,7 @@ cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p t
 - [Agent Tutorial (docs/AGENT_TUTORIAL.md)](docs/AGENT_TUTORIAL.md): Guide to creating and deploying custom agent archetypes.
 - [Plugin Development (docs/PLUGIN_DEVELOPMENT.md)](docs/PLUGIN_DEVELOPMENT.md): Writing external tools using JSON-RPC.
 - [Contributing Guide (docs/CONTRIBUTING.md)](docs/CONTRIBUTING.md): Code standards, pull request process, and verification rules.
-- [Swarm Audit Report (docs/SWARM_AUDIT_REPORT.md)](docs/SWARM_AUDIT_REPORT.md): Audit report covering physical code verification.
+- [Internal Remediation Log (docs/SWARM_AUDIT_REPORT.md)](docs/SWARM_AUDIT_REPORT.md): Historical development punchlist of resolved defects and structural fixes identified during early builds.
 
 ---
 

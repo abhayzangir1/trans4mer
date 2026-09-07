@@ -27,23 +27,10 @@ fn main() {
         let cur = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
         if cur.join("trans4mers.sqlite").exists() {
             cur.join("trans4mers.sqlite")
-        } else if cur
-            .parent()
-            .map(|p| p.join("trans4mers.sqlite").exists())
-            .unwrap_or(false)
-        {
-            cur.parent().unwrap().join("trans4mers.sqlite")
-        } else if cur
-            .parent()
-            .and_then(|p| p.parent())
-            .map(|p| p.join("trans4mers.sqlite").exists())
-            .unwrap_or(false)
-        {
-            cur.parent()
-                .unwrap()
-                .parent()
-                .unwrap()
-                .join("trans4mers.sqlite")
+        } else if let Some(parent) = cur.parent().filter(|p| p.join("trans4mers.sqlite").exists()) {
+            parent.join("trans4mers.sqlite")
+        } else if let Some(grandparent) = cur.parent().and_then(|p| p.parent()).filter(|p| p.join("trans4mers.sqlite").exists()) {
+            grandparent.join("trans4mers.sqlite")
         } else {
             cur.join("trans4mers.sqlite")
         }

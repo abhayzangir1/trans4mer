@@ -34,7 +34,8 @@ pub async fn run_agent_execution(
     cancellation_token: CancellationToken,
 ) -> Result<ExecutionState, Trans4mersError> {
     let mut current_permit = Some(_permit);
-    let mut target_channel_id = trans4mers_domain::ids::ChannelId::from_str("general").unwrap();
+    let mut target_channel_id = trans4mers_domain::ids::ChannelId::from_str("general")
+        .unwrap_or_else(|_| trans4mers_domain::ids::ChannelId::new());
     let mut target_convo_id = state.conversation_id;
     let mut current_sequence_id: i64;
 
@@ -630,8 +631,7 @@ pub async fn run_agent_execution(
                             } else {
                                 thought = response.content.clone();
                             }
-                        } else if parsed.get("action").is_some() {
-                            let act_val = parsed.get("action").unwrap();
+                        } else if let Some(act_val) = parsed.get("action") {
                             if let Some(tool_name) =
                                 act_val.get("tool_name").and_then(|v| v.as_str())
                             {

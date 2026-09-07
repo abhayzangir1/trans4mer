@@ -609,7 +609,8 @@ impl MemoryEngine {
             .ok_or_else(|| Trans4mersError::Database("Project database not found".to_string()))?;
 
         db.with_write_tx(|tx| {
-            let metadata_json = serde_json::to_string(&rule.metadata).unwrap();
+            let metadata_json = serde_json::to_string(&rule.metadata)
+                .map_err(|e| Trans4mersError::Serialization(e.to_string()))?;
             let confidence_str = rule.confidence.to_string();
             let emb_blob = trans4mers_storage::embedding_to_blob(embedding);
 

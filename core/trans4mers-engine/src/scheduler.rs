@@ -290,7 +290,8 @@ impl Scheduler {
                 }) {
                 Ok(res) => (
                     std::str::FromStr::from_str(&res.0).unwrap_or_else(|_| {
-                        trans4mers_domain::ids::AgentDefinitionId::from_str("boss").unwrap()
+                        trans4mers_domain::ids::AgentDefinitionId::from_str("boss")
+                            .unwrap_or_else(|_| trans4mers_domain::ids::AgentDefinitionId::new())
                     }),
                     res.1,
                 ),

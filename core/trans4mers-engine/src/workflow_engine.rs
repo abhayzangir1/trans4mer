@@ -95,7 +95,10 @@ impl WorkflowEngine {
 
         let workflow = self.get_workflow(&project_id, &workflow_id)?;
 
-        let db = self.state.get_project_db(&project_id).unwrap();
+        let db = self
+            .state
+            .get_project_db(&project_id)
+            .ok_or_else(|| Trans4mersError::Database("Project database not found".to_string()))?;
         let mut recovered_node_id: Option<String> = None;
         let _ = db.with_read_conn(|conn| {
             if let Ok(node_id) = conn.query_row(
@@ -265,13 +268,15 @@ impl WorkflowEngine {
                         )
                         .await?;
 
-                        let _ = self.state.get_project_db(&project_id).unwrap().with_write_tx(|tx| {
-                            let mut checkpoint = active_nodes.clone();
-                            checkpoint.insert(0, current_node_id);
-                            let checkpoint_json = serde_json::to_string(&checkpoint).unwrap_or_default();
-                            tx.execute("UPDATE workflow_runs SET status = 'Paused', current_node_id = ?2 WHERE id = ?1", rusqlite::params![run_id.as_str(), checkpoint_json])?;
-                            Ok(())
-                        });
+                        if let Some(db) = self.state.get_project_db(&project_id) {
+                            let _ = db.with_write_tx(|tx| {
+                                let mut checkpoint = active_nodes.clone();
+                                checkpoint.insert(0, current_node_id);
+                                let checkpoint_json = serde_json::to_string(&checkpoint).unwrap_or_default();
+                                tx.execute("UPDATE workflow_runs SET status = 'Paused', current_node_id = ?2 WHERE id = ?1", rusqlite::params![run_id.as_str(), checkpoint_json])?;
+                                Ok(())
+                            });
+                        }
                         return Ok(());
                     }
                 }

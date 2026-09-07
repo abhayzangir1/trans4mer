@@ -139,7 +139,10 @@ impl TerminalManager {
     ) -> Result<(), Trans4mersError> {
         if let Some(session_ref) = self.sessions.get(terminal_id) {
             let session = session_ref.read().await;
-            let master = session.master_pty.lock().unwrap();
+            let master = session
+                .master_pty
+                .lock()
+                .map_err(|_| Trans4mersError::Internal("Terminal PTY mutex poisoned".to_string()))?;
             master
                 .resize(PtySize {
                     rows,

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 use tiktoken_rs::cl100k_base;
-use tracing::info;
+use tracing::{info, warn};
 use trans4mers_domain::config::{CompactionConfig, ModelConfig};
 use trans4mers_domain::execution::{ExecutionState, ReActStep};
 use trans4mers_domain::provider::{LlmMessage, LlmProvider, LlmRequest};
@@ -21,7 +21,13 @@ impl ContextCompactor {
             return;
         }
 
-        let bpe = cl100k_base().unwrap();
+        let bpe = match cl100k_base() {
+            Ok(b) => b,
+            Err(e) => {
+                warn!("Failed to initialize cl100k tokenizer: {}. Skipping compaction.", e);
+                return;
+            }
+        };
 
         let max_context_tokens = model_config.context_limit.unwrap_or(8192) as usize;
         let safe_threshold =

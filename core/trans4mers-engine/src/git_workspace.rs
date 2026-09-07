@@ -34,8 +34,11 @@ impl GitWorkspace {
             let oid = index
                 .write_tree()
                 .map_err(|e| Trans4mersError::Internal(e.to_string()))?;
-            let sig = git2::Signature::now("Trans4mers", "trans4mers@local").unwrap();
-            let tree = repo.find_tree(oid).unwrap();
+            let sig = git2::Signature::now("Trans4mers", "trans4mers@local")
+                .map_err(|e| Trans4mersError::Internal(format!("git2 signature failed: {}", e)))?;
+            let tree = repo
+                .find_tree(oid)
+                .map_err(|e| Trans4mersError::Internal(format!("git2 find_tree failed: {}", e)))?;
 
             repo.commit(
                 Some("HEAD"),

@@ -123,14 +123,14 @@ pub fn update_execution_status(
 }
 
 pub fn insert_step(conn: &Connection, step: &ExecutionStep) -> Result<(), Trans4mersError> {
-    let tool_call_json = step
-        .tool_call_request
-        .as_ref()
-        .map(|r| serde_json::to_string(r).unwrap());
-    let token_usage_json = step
-        .token_usage
-        .as_ref()
-        .map(|t| serde_json::to_string(t).unwrap());
+    let tool_call_json = match &step.tool_call_request {
+        Some(r) => Some(serde_json::to_string(r).map_err(|e| Trans4mersError::Database(e.to_string()))?),
+        None => None,
+    };
+    let token_usage_json = match &step.token_usage {
+        Some(t) => Some(serde_json::to_string(t).map_err(|e| Trans4mersError::Database(e.to_string()))?),
+        None => None,
+    };
 
     conn.execute(
         "INSERT INTO execution_steps (
@@ -265,14 +265,14 @@ pub fn list_steps(
 }
 
 pub fn upsert_checkpoint(conn: &Connection, cp: &Checkpoint) -> Result<(), Trans4mersError> {
-    let pending_state_json = cp
-        .pending_tool_state
-        .as_ref()
-        .map(|s| serde_json::to_string(s).unwrap());
-    let context_snap_json = cp
-        .context_snapshot
-        .as_ref()
-        .map(|s| serde_json::to_string(s).unwrap());
+    let pending_state_json = match &cp.pending_tool_state {
+        Some(s) => Some(serde_json::to_string(s).map_err(|e| Trans4mersError::Database(e.to_string()))?),
+        None => None,
+    };
+    let context_snap_json = match &cp.context_snapshot {
+        Some(s) => Some(serde_json::to_string(s).map_err(|e| Trans4mersError::Database(e.to_string()))?),
+        None => None,
+    };
 
     conn.execute(
         "INSERT INTO execution_checkpoints (

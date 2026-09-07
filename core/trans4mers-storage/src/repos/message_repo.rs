@@ -5,9 +5,12 @@ use trans4mers_domain::ids::MessageId;
 use trans4mers_domain::message::Message;
 
 pub fn insert_message(conn: &Connection, msg: &Message) -> Result<(), Trans4mersError> {
-    let sender_json = serde_json::to_string(&msg.sender).unwrap();
-    let mentions_json = serde_json::to_string(&msg.mentions).unwrap();
-    let attachments_json = serde_json::to_string(&msg.attachments).unwrap();
+    let sender_json = serde_json::to_string(&msg.sender)
+        .map_err(|e| Trans4mersError::Database(format!("Failed to serialize sender: {}", e)))?;
+    let mentions_json = serde_json::to_string(&msg.mentions)
+        .map_err(|e| Trans4mersError::Database(format!("Failed to serialize mentions: {}", e)))?;
+    let attachments_json = serde_json::to_string(&msg.attachments)
+        .map_err(|e| Trans4mersError::Database(format!("Failed to serialize attachments: {}", e)))?;
 
     conn.execute(
         "INSERT INTO messages (

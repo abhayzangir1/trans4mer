@@ -166,10 +166,7 @@ impl Tool for DelegateTaskTool {
                     description: format!("Autonomous agent specialized in {}", role_name),
                     system_instructions: sys_instructions.clone(),
                     default_model_config: model_config.clone(),
-                    baseline_capabilities: serde_json::from_str(
-                        &serde_json::to_string(&capabilities).unwrap(),
-                    )
-                    .unwrap(),
+                    baseline_capabilities: serde_json::from_value(capabilities.clone()).unwrap_or_default(),
                     default_skills: vec![],
                     default_tools: vec![],
                     metadata: std::collections::HashMap::new(),
@@ -187,9 +184,9 @@ impl Tool for DelegateTaskTool {
                             role_name.as_str(),
                             format!("Autonomous agent specialized in {}", role_name),
                             sys_instructions.as_str(),
-                            serde_json::to_string(&model_config).unwrap(),
-                            serde_json::to_string(&capabilities).unwrap(),
-                            serde_json::to_string(&tools).unwrap(),
+                            serde_json::to_string(&model_config).unwrap_or_default(),
+                            serde_json::to_string(&capabilities).unwrap_or_default(),
+                            serde_json::to_string(&tools).unwrap_or_default(),
                         ]
                     )?;
                     Ok(())
@@ -348,7 +345,7 @@ impl Tool for DelegateTaskTool {
                     agent.definition_id.as_str(),
                     agent.parent_instance_id.as_ref().map(|id| id.as_str()),
                     "Active",
-                    serde_json::to_string(&agent.capabilities).unwrap(),
+                    serde_json::to_string(&agent.capabilities).unwrap_or_else(|_| "[]".to_string()),
                     agent.depth_level,
                     agent.created_at.to_rfc3339(),
                     agent.updated_at.to_rfc3339()

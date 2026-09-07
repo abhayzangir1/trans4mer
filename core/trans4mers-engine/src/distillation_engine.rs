@@ -111,8 +111,10 @@ impl DistillationEngine {
                 continue;
             }
 
-            // Check inactivity: ensure the most recent message was created at least 30 seconds ago
-            let last_msg = messages.last().unwrap();
+            let last_msg = match messages.last() {
+                Some(m) => m,
+                None => continue,
+            };
             let last_msg_time = DateTime::parse_from_rfc3339(&last_msg.3)
                 .map(|dt| dt.with_timezone(&Utc))
                 .unwrap_or_else(|_| Utc::now());

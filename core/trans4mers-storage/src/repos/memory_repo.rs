@@ -8,10 +8,10 @@ use trans4mers_domain::memory::{
 };
 
 pub fn insert_project_memory(conn: &Connection, mem: &Memory) -> Result<(), Trans4mersError> {
-    let visibility_json = mem
-        .visibility_overrides
-        .as_ref()
-        .map(|v| serde_json::to_string(v).unwrap());
+    let visibility_json = match &mem.visibility_overrides {
+        Some(v) => Some(serde_json::to_string(v).map_err(|e| Trans4mersError::Database(e.to_string()))?),
+        None => None,
+    };
     let last_retrieved_str = mem.last_retrieved_at.map(|d| d.to_rfc3339());
     let embedding_bytes = mem
         .embedding

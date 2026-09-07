@@ -10,7 +10,8 @@ impl EventRepo {
         let payload = serde_json::to_string(&envelope.event)
             .map_err(|e| Trans4mersError::Internal(format!("Failed to serialize event: {}", e)))?;
 
-        let event_val = serde_json::to_value(&envelope.event).unwrap();
+        let event_val = serde_json::to_value(&envelope.event)
+            .map_err(|e| Trans4mersError::Internal(format!("Failed to serialize event value: {}", e)))?;
         let event_type = event_val
             .get("type")
             .and_then(|v| v.as_str())

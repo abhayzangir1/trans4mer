@@ -8,8 +8,10 @@ use trans4mers_domain::ids::{
 use trans4mers_domain::workflow::{Workflow, WorkflowRun, WorkflowRunStatus};
 
 pub fn insert_workflow(conn: &Connection, wf: &Workflow) -> Result<(), Trans4mersError> {
-    let nodes_json = serde_json::to_string(&wf.nodes).unwrap();
-    let edges_json = serde_json::to_string(&wf.edges).unwrap();
+    let nodes_json = serde_json::to_string(&wf.nodes)
+        .map_err(|e| Trans4mersError::Database(format!("Failed to serialize workflow nodes: {}", e)))?;
+    let edges_json = serde_json::to_string(&wf.edges)
+        .map_err(|e| Trans4mersError::Database(format!("Failed to serialize workflow edges: {}", e)))?;
 
     conn.execute(
         "INSERT INTO workflows (
