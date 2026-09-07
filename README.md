@@ -69,22 +69,13 @@ If you have cloned the repository, launch Trans4mers immediately via the automat
 
 ---
 
-### 3. Quick Local Model Setup
+### 3. Model Engine: Sovereign Local & Frontier BYOK <a id="model-setup"></a>
 
-Trans4mers recommends fast, compact local models that excel at tool calling and structured reasoning:
+Trans4mers is strictly **model-agnostic**. It automatically discovers models in your environment and gives you complete autonomy over the reasoning engines powering your swarms:
 
-```bash
-# Recommended default coding model (3B parameters, ~2GB VRAM, fast tool calling)
-ollama pull qwen2.5-coder:3b
-
-# Recommended orchestrator model (8B parameters, balanced reasoning)
-ollama pull llama3.1:8b
-
-# Optional deep reasoning model (8B distilled reasoning)
-ollama pull deepseek-r1:8b
-```
-
-*Optional Cloud BYOK:* If you prefer hybrid operation, you can enter your own OpenAI, Anthropic, or Google Gemini API keys in **Settings**. Keys are stored exclusively in your local OS Keyring (Windows Credential Manager / macOS Keychain / Linux Secret Service) with zero telemetry.
+- **Capable Local Workstation Execution (Ollama):** For 100% sovereign, private offline execution, Trans4mers integrates with any local Ollama endpoint. For heavy multi-agent workflows, refactoring, and multi-step tool calling, capable high-parameter models (such as `qwen2.5-coder:32b`, `deepseek-r1:32b+`, `llama3.3:70b`, or custom GGUFs) deliver rigorous reasoning without cloud data leakage.
+- **Frontier Cloud BYOK (Bring Your Own Key):** When tasks demand frontier intelligence (such as Anthropic Claude 3.7 Sonnet / Opus, OpenAI o1 / o3-mini / GPT-4.5, or Google Gemini 2.0 Pro / Flash), you can enter your API keys directly into **Settings**. Keys are vaulted exclusively in your workstation's local OS Keyring (Windows Credential Manager / macOS Keychain / Linux Secret Service) and executed directly from your workstation with zero proxying or telemetry.
+- **Per-Agent Model Specialization:** In the Swarm Designer, assign different models to different agent archetypes—for example, pairing local models for fast terminal and RAG sub-agents with frontier reasoning engines for the Lead Architect and Security Auditor.
 
 ---
 

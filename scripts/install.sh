@@ -34,7 +34,7 @@ fi
 # Ollama (optional, for the local LLM). ASK FIRST — nothing is installed
 # without explicit consent (and NO MODEL is ever installed by this script
 # or by the app; you pull models yourself, e.g.
-# `ollama pull qwen2.5-coder:3b`).
+# `ollama pull qwen2.5-coder:32b`).
 if ! command -v ollama >/dev/null 2>&1; then
   echo "==> Ollama (the local LLM runtime) is not installed."
   read -r -p "    Install Ollama now? [y/N] " answer

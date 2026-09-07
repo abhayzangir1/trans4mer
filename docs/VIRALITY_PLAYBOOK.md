@@ -101,7 +101,7 @@ Because events are durably written to SQLite before side effects execute, the en
 
 ### Key Architectural Choices:
 1. **Local-First & Zero Phone-Home:**
-   - Designed to run out of the box with local Ollama (`qwen2.5-coder:3b`, `llama3.2`, or `mistral`).
+   - Designed to run out of the box with local Ollama (`qwen2.5-coder`, `deepseek-r1`, `llama3.3`, or custom models).
    - Also supports BYOK (Bring Your Own Key) for Anthropic, OpenAI, and Gemini with an active model scanner that discovers available models via API rather than hardcoded lists.
 2. **4-Tier Memory Pyramid with `sqlite-vec`:**
    - **Working Memory:** Ephemeral scratchpad for the active ReAct loop.

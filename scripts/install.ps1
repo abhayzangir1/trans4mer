@@ -26,7 +26,7 @@ if (-not $webview2) {
 
 # Ollama (optional). ASK FIRST — nothing is installed without explicit
 # consent, and NO MODEL is ever installed by this script or by the app
-# (you pull models yourself, e.g. `ollama pull qwen2.5-coder:3b`).
+# (you pull models yourself, e.g. `ollama pull qwen2.5-coder:32b`).
 if (-not (Get-Command ollama -ErrorAction SilentlyContinue)) {
     Write-Host "==> Ollama (the local LLM runtime) is not installed." -ForegroundColor Yellow
     $answer = Read-Host "    Install Ollama now? [y/N]"

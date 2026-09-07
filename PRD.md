@@ -7,7 +7,7 @@
 
 **Trans4mers** is a local-first, privacy-first, zero-marginal-cost multi-agent desktop operating system. It replaces the dominant cloud agent paradigm (user $\to$ cloud framework $\to$ proprietary model API $\to$ cloud database) with a completely sovereign stack:
 - **Tauri 2 Desktop Application** hosting an asynchronous Rust core engine (`trans4mers-engine`).
-- **Local LLM Execution** powered by Ollama (default: `qwen2.5-coder:3b`, `llama3.1:8b`, `deepseek-r1`) with optional Bring-Your-Own-Key (BYOK) for frontier cloud models.
+- **Local LLM Execution** powered by Ollama (e.g. `qwen2.5-coder`, `deepseek-r1`, `llama3.3`) with optional Bring-Your-Own-Key (BYOK) for frontier cloud models.
 - **Durable Event-Sourced Storage** using embedded SQLite in WAL mode with synchronous writes and foreign key constraints.
 - **Physical Sandboxing & Human Governance** via capability lattices, git worktree isolation, SHA-256 content-addressed action diffs, and zero-trust approval gates.
 - **Zero Telemetry & Zero Egress by Default**: Trans4mers does not phone home, does not require an account, does not auto-download models, and operates completely offline with the network disconnected.
