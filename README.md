@@ -18,14 +18,15 @@
 </p>
 
 <p align="center">
-  <a href=#quick-start--one-click-install>Quick Start</a> •
-  <a href=#core-capabilities>Capabilities</a> •
-  <a href=#architecture>Architecture</a> •
-  <a href=#subsystem-deep-dives>Subsystems</a> •
-  <a href=#model-setup>Models</a> •
-  <a href=#benchmarks--footprint>Benchmarks</a> •
-  <a href=#codebase-structure>Structure</a> •
-  <a href=#documentation>Docs</a>
+  <a href="#quick-start--one-click-install">Quick Start</a> •
+  <a href="#product-screenshots">Screenshots</a> •
+  <a href="#core-capabilities">Capabilities</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#subsystem-deep-dives">Subsystems</a> •
+  <a href="#model-setup">Models</a> •
+  <a href="#benchmarks--footprint">Benchmarks</a> •
+  <a href="#codebase-structure">Structure</a> •
+  <a href="#documentation">Docs</a>
 </p>
 
 ---
@@ -35,6 +36,43 @@
 Trans4mers is a local desktop application for running autonomous agent swarms on your own computer. It combines an asynchronous Rust engine with local Ollama inference, an embedded SQLite database using `sqlite-vec`, and a native Tauri v2 desktop shell.
 
 Every state transition writes to an append-only event log before updating database tables. If the application gets terminated mid-task, the engine reads the log on next startup, replays pending events, and picks up where it stopped. Dangerous actions like writing files outside scratch, executing shell commands, or changing database rules pause for operator review.
+
+---
+
+## Product Screenshots & System Interface <a id="product-screenshots"></a>
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h3 align="center">Real-Time Swarm Topology & Map</h3>
+      <a href="assets/screenshots/02_realtime_swarm_map.png"><img src="assets/screenshots/02_realtime_swarm_map.png" alt="Real-time Swarm Map" /></a>
+      <p align="center"><i>Visualizing hierarchical task delegation, running workers, and active state transitions in a live interactive DAG.</i></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3 align="center">Zero-Trust Human Approval (HITL)</h3>
+      <a href="assets/screenshots/03_hitl_human_approval.png"><img src="assets/screenshots/03_hitl_human_approval.png" alt="Human In The Loop Approval" /></a>
+      <p align="center"><i>Deterministic policy gating: destructive terminal commands and code modifications halt for operator authorization.</i></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h3 align="center">Slack-Style Blackboard & Channels</h3>
+      <a href="assets/screenshots/04_slack_orchestration_blackboard.png"><img src="assets/screenshots/04_slack_orchestration_blackboard.png" alt="Shared Blackboard Orchestration" /></a>
+      <p align="center"><i>Specialized agent teams collaborating via shared pub/sub channels, consensus blackboards, and private DMs.</i></p>
+    </td>
+    <td width="50%" valign="top">
+      <h3 align="center">Sandboxed Code Execution & IDE</h3>
+      <a href="assets/screenshots/05_isolated_sandboxing_ide.png"><img src="assets/screenshots/05_isolated_sandboxing_ide.png" alt="Sandboxed Code Execution" /></a>
+      <p align="center"><i>Agents write and refactor code directly on disk with live Monaco editor inspection and PTY terminal sessions.</i></p>
+    </td>
+  </tr>
+</table>
+
+<div align="center">
+  <h3>System Control Plane Architecture</h3>
+  <a href="assets/screenshots/01_system_architecture.png"><img src="assets/screenshots/01_system_architecture.png" alt="Trans4mers System Architecture Diagram" width="95%" /></a>
+  <p><i>High-level topology of the async Tokio ReAct loop, 4-tier cognitive memory, and zero-trust tool executors.</i></p>
+</div>
 
 ---
 
