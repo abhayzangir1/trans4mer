@@ -372,14 +372,6 @@ cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p t
 
 ---
 
-## 💖 Support the Developer
-
-I am a solo student developer building Trans4mers out of passion for local AI, systems programming, and distributed architectures. Developing, testing, and stress-testing complex multi-agent swarms completely offline requires significant hardware time, electricity, and compute resources.
-
-If you would like to support hardware and compute costs, or contribute directly via PayPal, Razorpay, or UPI, feel free to reach out via [GitHub Issues](https://github.com/abhayzangir1/trans4mer/issues) or email at `abhayzangir@gmail.com`. (Direct payment links can be wired up once configured).
-
----
-
 ## License
 
 Trans4mers is released under the **[MIT License](LICENSE)**.  
