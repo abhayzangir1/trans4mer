@@ -38,8 +38,10 @@ Trans4mers is a local desktop application for running autonomous agent swarms on
 Every state transition writes to an append-only event log before updating database tables. If the application gets terminated mid-task, the engine reads the log on next startup, replays pending events, and picks up where it stopped. Dangerous actions like writing files outside scratch, executing shell commands, or changing database rules pause for operator review.
 
 > [!WARNING]
-> **Project Status & Security Notice:**  
-> Trans4mers is an early-stage, solo-authored personal research project. While it implements a zero-trust capability lattice and Myers LCS diff review gating, **it has not undergone independent external third-party security audits.** Because this software executes shell commands and writes files directly to your workstation, always inspect proposed agent actions in the Human-in-the-Loop Diff Panel before granting authorization. Run within sandboxed, test, or backed-up environments.
+> **Project Status & Security Notice (Solo Student Developer • Alpha Project):**  
+> Trans4mers is an early-stage, active work-in-progress research and learning project built by a solo student developer. While it implements a zero-trust capability lattice, anti-TOCTOU argument hashing, and Myers LCS diff review gating, **it has not undergone independent external third-party commercial security audits, nor has it been battle-tested across thousands of production environments.**  
+>  
+> Because this software executes shell commands and writes files directly to your workstation, **there may be undiscovered edge cases, minor to critical bugs, or unexpected behavior.** Always exercise strict operator caution with autonomous shell execution: carefully inspect proposed agent actions in the Human-in-the-Loop Diff Panel before approving, and test within sandboxed, containerized, or backed-up directories. Feedback, bug reports, and pull requests from experienced developers are warmly welcomed!
 
 ---
 
