@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use tracing::info;
 use trans4mers_domain::error::Trans4mersError;
 
@@ -85,7 +85,7 @@ impl BrowserBinaryDetector {
                 continue;
             }
             for sub in sub_paths {
-                paths.push(Path::new(base).join(sub));
+                paths.push(PathBuf::from(base).join(sub));
             }
         }
 
