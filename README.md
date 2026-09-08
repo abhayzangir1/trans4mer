@@ -5,7 +5,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/abhayzangir1/trans4mer/releases"><img src="https://img.shields.io/badge/Release-v0.1.0-blue?style=for-the-badge&logo=github" alt="Release v0.1.0" /></a>
+  <a href="https://github.com/abhayzangir1/trans4mer/actions/workflows/ci.yml"><img src="https://github.com/abhayzangir1/trans4mer/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
+  <a href="https://github.com/abhayzangir1/trans4mer/releases"><img src="https://img.shields.io/badge/Release-v0.1.0--alpha-blue?style=for-the-badge&logo=github" alt="Release v0.1.0-alpha" /></a>
+  <img src="https://img.shields.io/badge/Status-Alpha_%2F_WIP-yellow?style=for-the-badge" alt="Alpha / WIP" />
   <img src="https://img.shields.io/badge/Rust-2024_Edition-orange?logo=rust&style=for-the-badge" alt="Rust 2024" />
   <img src="https://img.shields.io/badge/Tauri-v2.0-24C8D8?logo=tauri&style=for-the-badge" alt="Tauri v2" />
   <img src="https://img.shields.io/badge/Database-SQLite_%2B_sqlite--vec-003B57?logo=sqlite&style=for-the-badge" alt="SQLite" />
