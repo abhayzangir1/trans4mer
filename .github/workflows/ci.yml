@@ -30,15 +30,18 @@ jobs:
           components: clippy, rustfmt
 
       - name: Install Protobuf Compiler (protoc)
-        uses: arduino/setup-protoc@v3
+        uses: taiki-e/install-action@v2
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          tool: protoc
 
-      - name: Install Linux Dependencies (WebKitGTK & OpenSSL)
+      - name: Install Linux Dependencies (WebKitGTK, OpenSSL & Protobuf)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev protobuf-compiler libprotobuf-dev
+
+      - name: Verify Protoc
+        run: protoc --version
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
