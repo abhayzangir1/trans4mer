@@ -1,7 +1,5 @@
-﻿# GitHub Funding Configuration
-# Enables the native GitHub "Sponsor" button on https://github.com/abhayzangir1/trans4mer
+# GitHub Funding Configuration
+# Uncomment and populate with verified custom payment links once provided:
+# custom: ['https://paypal.me/<username>', 'https://pages.razorpay.com/<link>']
 
-github: [abhayzangir1]
-buy_me_a_coffee: abhayzangir
-ko_fi: abhayzangir
-custom: ['https://github.com/sponsors/abhayzangir1']
+# github: [abhayzangir1]

@@ -16,12 +16,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/sponsors/abhayzangir1"><img src="https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?style=for-the-badge&logo=githubsponsors" alt="Sponsor" /></a>
-  <a href="https://buymeacoffee.com/abhayzangir"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-Support-yellow?style=for-the-badge&logo=buy-me-a-coffee" alt="Buy Me A Coffee" /></a>
-  <a href="https://ko-fi.com/abhayzangir"><img src="https://img.shields.io/badge/Ko--fi-Support_Me-ff5e5b?style=for-the-badge&logo=ko-fi" alt="Ko-fi" /></a>
-</p>
-
-<p align="center">
   <strong>Local, event-sourced multi-agent desktop application running on your workstation.</strong>
 </p>
 
@@ -382,11 +376,7 @@ cargo check -p trans4mers-domain -p trans4mers-storage -p trans4mers-engine -p t
 
 I am a solo student developer building Trans4mers out of passion for local AI, systems programming, and distributed architectures. Developing, testing, and stress-testing complex multi-agent swarms completely offline requires significant hardware time, electricity, and compute resources.
 
-If you find Trans4mers useful, appreciate the local-first architecture, or want to support an independent student builder, any sponsorship or coffee is deeply appreciated!
-
-- **GitHub Sponsors:** [sponsor @abhayzangir1](https://github.com/sponsors/abhayzangir1)
-- **Buy Me a Coffee:** [buymeacoffee.com/abhayzangir](https://buymeacoffee.com/abhayzangir)
-- **Ko-fi:** [ko-fi.com/abhayzangir](https://ko-fi.com/abhayzangir)
+If you would like to support hardware and compute costs, or contribute directly via PayPal, Razorpay, or UPI, feel free to reach out via [GitHub Issues](https://github.com/abhayzangir1/trans4mer/issues) or email at `abhayzangir@gmail.com`. (Direct payment links can be wired up once configured).
 
 ---
 
