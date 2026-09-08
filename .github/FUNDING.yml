@@ -1,0 +1,7 @@
+﻿# GitHub Funding Configuration
+# Enables the native GitHub "Sponsor" button on https://github.com/abhayzangir1/trans4mer
+
+github: [abhayzangir1]
+buy_me_a_coffee: abhayzangir
+ko_fi: abhayzangir
+custom: ['https://github.com/sponsors/abhayzangir1']
