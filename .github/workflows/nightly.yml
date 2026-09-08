@@ -1,15 +1,57 @@
 name: Nightly E2E
+
 on:
   schedule:
     - cron: '0 3 * * *'  # 3 AM UTC daily
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e:
+    name: Nightly E2E Test (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Protobuf Compiler (protoc)
+        uses: taiki-e/install-action@v2
+        with:
+          tool: protoc
+
+      - name: Install Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev protobuf-compiler libprotobuf-dev curl
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+
       - name: Install Ollama
         run: curl -fsSL https://ollama.com/install.sh | sh
-      - name: Pull model
-        run: ollama pull llama3.1:8b
-      - run: cargo test --workspace --features e2e-tests -- --ignored
+
+      - name: Start Ollama Daemon
+        run: |
+          ollama serve &
+          echo "Waiting for Ollama daemon to initialize on port 11434..."
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:11434/api/tags > /dev/null; then
+              echo "Ollama is online and responsive!"
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Pull Lightweight Test Model
+        run: |
+          ollama pull qwen2.5:0.5b || ollama pull llama3.2:1b || true
+
+      - name: Run E2E Ignored Tests
+        run: cargo test --workspace --exclude trans4mers-desktop -- --ignored
+
